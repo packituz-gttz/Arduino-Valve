@@ -182,11 +182,12 @@ class Valvulas(QMainWindow,
     @pyqtSignature("")
     def on_btn_execute_clicked(self):
         string_data = ''
+        list_strings = []
         if str(self.arduino_combobox.currentText()):
             self.statusBar1.showMessage('Connecting...')
             for elem_edit in self.lineEdits_list:
                 # delay
-                string_data = string_data + str(((int(elem_edit[0].text()) * 3600) + (int(elem_edit[0].text()) * 60) \
+                string_data = string_data + str(((int(elem_edit[0].text()) * 3600) + (int(elem_edit[1].text()) * 60) \
                 + (int(elem_edit[2].text()))) * 1000) + ';'
                 # ON
                 string_data = string_data + str(((int(elem_edit[3].text()) * 3600) + (int(elem_edit[4].text()) * 60) \
@@ -198,7 +199,10 @@ class Valvulas(QMainWindow,
                 string_data = string_data + str(((int(elem_edit[9].text()) * 3600) + (int(elem_edit[10].text()) * 60) \
                                                  + (int(elem_edit[11].text()))) * 1000) + ';'
 
-            self.thread_connection = Arduino_Communication(str(self.arduino_combobox.currentText()), string_data)
+                list_strings.append(string_data)
+                string_data = ''
+
+            self.thread_connection = Arduino_Communication(str(self.arduino_combobox.currentText()), list_strings)
             self.thread_connection.start()
             self.btn_execute.setEnabled(False)
             self.thread_connection.finished.connect(self.finished_thread)
@@ -364,60 +368,47 @@ class Arduino_Communication(QThread):
     connection_error = Signal(str)
     connection_success = Signal(str)
 
-    def __init__(self, device=None, data='', parent=None):
+    def __init__(self, device=None, list_data=[], parent=None):
         super(Arduino_Communication, self).__init__(parent)
         self.device = device
-        self.data = data
+        self.list_data = list_data
         self.serial_connection = None
 
     def run(self):
-        tries = 0
         try:
-            # print ("Serial status:", self.serial_connection)
-            # if self.serial_connection is not None:
-            #     print "Not none"
-            #     if self.serial_connection.is_open:
-            #         print "closing"
-            #         self.serial_connection.close()
             self.serial_connection = serial.Serial(self.device, 9600, timeout=4, write_timeout=4)
-            print ("DEVICE: ", self.device)
-            #self.serial_connection = serial.Serial(self.device, 9600, timeout=4, write_timeout=4)
-            # This one is the useful
-            self.sleep(4)
-            print "success on connection!"
-            self.serial_connection.write(self.data.encode('utf-8'))
-            print "send data"
-            self.serial_connection.flushOutput()
-            while tries < 4:
-                print "NAZ"
-                # self.sleep(4)
-                data = self.serial_connection.readline()
-                self.serial_connection.flushInput()
-                print "MES"
-                print ("Mi data:", self.data)
-                print ("data:", data)
-                if data:
-                    if data.replace('\r\n', '') == self.data:
-                        self.connection_success.emit('success')
-                        break
-                    print ("Response", data)
-
-                tries = tries + 1
-                print ("Data:", data)
-            if tries >= 4:
-                raise Connection_TimeOut_Arduino()
+            for count, elem_string in enumerate(self.list_data, 0):
+                tries = 0
+                self.sleep(2)
+                self.serial_connection.write(self.list_data[count])
+                self.serial_connection.flushOutput()
+                while tries < 4:
+                    data = self.serial_connection.readline()
+                    self.serial_connection.flushInput()
+                    if data:
+                        if data.replace('\r\n', '') == self.list_data[count]:
+                            print data
+                            self.serial_connection.write('OK')
+                            self.sleep(2)
+                            break
+                if tries >= 4:
+                    print "retries err"
+                    raise Connection_TimeOut_Arduino()
+            self.serial_connection.write('DONE')
+            while(True):
+                data_me = self.serial_connection.readline()
+                print data_me
         except (serial.SerialException, Connection_TimeOut_Arduino):
             print "closed err"
             try:
+                self.serial_connection.write('KO')
                 self.serial_connection.close()
             except AttributeError:
                 print "No such object"
             self.connection_error.emit('error')
+        else:
+            self.connection_success.emit('success')
 
-
-
-        finally:
-            pass
 
 
 

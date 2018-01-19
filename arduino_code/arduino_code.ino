@@ -16,13 +16,13 @@ String string_me = "serial ";
 String a;
 String mini_a;
 String string_append = "";
-long i = 0;
-long delay1 = 9000;
-long delay2 = 6000;
-long on1 = 5000;
-long on2 = 9000;
-long time_started1 = 0;
-long time_started2 = 0;
+unsigned long i = 0;
+unsigned long delay1 = 9000;
+unsigned long delay2 = 6000;
+unsigned long on1 = 5000;
+unsigned long on2 = 9000;
+unsigned long time_started1 = 0;
+unsigned long time_started2 = 0;
 
 long off1 = 0;
 long off2 = 3000;
@@ -61,6 +61,7 @@ boolean start = false;
 elapsedMillis timeElapsed;
 boolean ledState = LOW;
 boolean ledState2 = LOW;
+int cont_valves = 0;
 
 void setup()
 {
@@ -108,8 +109,11 @@ void loop()
       }
       
     }
-    start = true;
-    timeElapsed = 0;
+    if (cont_valves == 7){
+      cont_valves = 0;  
+      start = true;
+      timeElapsed = 0;
+    }
   }
 
 }
@@ -128,11 +132,10 @@ ISR(TIMER1_COMPA_vect)
           Serial.println(timeElapsed);
           Serial.println(ledState);
           digitalWrite(LEDPIN, ledState);
-          time_started1 = long(timeElapsed);
-
-          
+          time_started1 = long(timeElapsed);       
         }
       }
+      
       //LED2 Blanco
       if (valve2_delay_passed == false) {
         if (timeElapsed > delay2) {
@@ -146,7 +149,7 @@ ISR(TIMER1_COMPA_vect)
           time_started2 = long(timeElapsed);
         }
       }
-
+      //ONs to turn off led
       if (valve1_delay_passed == true) {
         long var_time1 = long(timeElapsed) - time_started1;
         if (var_time1 >= on1)
