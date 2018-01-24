@@ -1,7 +1,7 @@
 import serial
 import serial.tools.list_ports
 import os
-from PyQt4.QtCore import (Qt, pyqtSignature, QSignalMapper, QRegExp, QThread)
+from PyQt4.QtCore import (Qt, pyqtSignature, QSignalMapper, QRegExp, QThread, QEvent, QObject)
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QKeySequence, QRegExpValidator, QLabel, QFrame, QIcon, QAction,
                          QComboBox, QMessageBox, QProgressDialog)
 import Valvulas
@@ -24,6 +24,9 @@ class Valvulas(QMainWindow,
 
         self.myMapper = QSignalMapper(self)
         self.setupUi(self)
+
+        self._filter = Filter()
+        self.edit1_delayh.installEventFilter(self._filter)
         self.btn_save.setShortcut(QKeySequence.Save)
         self.sizeLabel = QLabel()
         self.sizeLabel.setFrameStyle(QFrame.StyledPanel | QFrame.Sunken)
@@ -79,27 +82,44 @@ class Valvulas(QMainWindow,
 
         index = 1
         for editLabels in self.lineEdits_list:
+            editLabels[0].installEventFilter(self._filter)
+            editLabels[1].installEventFilter(self._filter)
+            editLabels[2].installEventFilter(self._filter)
+            editLabels[3].installEventFilter(self._filter)
+            editLabels[4].installEventFilter(self._filter)
+            editLabels[5].installEventFilter(self._filter)
+            editLabels[6].installEventFilter(self._filter)
+            editLabels[7].installEventFilter(self._filter)
+            editLabels[8].installEventFilter(self._filter)
+            editLabels[9].installEventFilter(self._filter)
+            editLabels[10].installEventFilter(self._filter)
+            editLabels[11].installEventFilter(self._filter)
+
+            # Comment
             self.myMapper.setMapping(editLabels[0], index)
-            editLabels[0].textEdited.connect(self.myMapper.map)
+            editLabels[0].editingFinished.connect(self.myMapper.map)
 
             self.myMapper.setMapping(editLabels[1], index)
-            editLabels[1].textEdited.connect(self.myMapper.map)
+            editLabels[1].returnPressed .connect(self.myMapper.map)
 
             self.myMapper.setMapping(editLabels[2], index)
-            editLabels[2].textEdited.connect(self.myMapper.map)
+            editLabels[2].returnPressed.connect(self.myMapper.map)
 
             self.myMapper.setMapping(editLabels[3], index)
-            editLabels[3].textEdited.connect(self.myMapper.map)
+            editLabels[3].returnPressed.connect(self.myMapper.map)
 
             self.myMapper.setMapping(editLabels[4], index)
-            editLabels[4].textEdited.connect(self.myMapper.map)
+            editLabels[4].returnPressed.connect(self.myMapper.map)
 
             self.myMapper.setMapping(editLabels[5], index)
-            editLabels[5].textEdited.connect(self.myMapper.map)
+            editLabels[5].returnPressed.connect(self.myMapper.map)
 
             index = index + 1
 
-        # self.myMapper.mapped['int'].connect(self.calculateTime)
+        self.myMapper.mapped['int'].connect(self.print_me)
+
+    def print_me(self):
+        print "ok"
 
     def createToolBar(self):
 
@@ -397,7 +417,6 @@ class Arduino_Communication(QThread):
                     print "retries err"
                     raise Connection_TimeOut_Arduino()
             # self.serial_connection.write('--DONE--')
-
         except (serial.SerialException, Connection_TimeOut_Arduino):
             print "closed err"
             try:
@@ -413,3 +432,17 @@ class Arduino_Communication(QThread):
 
 
 
+class Filter(QObject):
+    def eventFilter(self, widget, event):
+        # FocusOut event
+        if event.type() == QEvent.FocusOut:
+            # do custom stuff
+            print 'focus out'
+            if widget.text() == '':
+                widget.setText('0')
+            # return False so that the widget will also handle the event
+            # otherwise it won't focus out
+            return False
+        else:
+            # we don't care about other events
+            return False
