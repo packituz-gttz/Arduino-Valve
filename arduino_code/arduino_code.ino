@@ -17,8 +17,8 @@ String a;
 String mini_a;
 String string_append = "";
 unsigned long i = 0;
-unsigned long delay1 = 9000;
-unsigned long delay2 = 6000;
+unsigned long delay1 = 2000;
+unsigned long delay2 = 2000;
 unsigned long on1 = 5000;
 unsigned long on2 = 9000;
 unsigned long time_started1 = 0;
@@ -114,7 +114,11 @@ void loop()
       start = true;
       timeElapsed = 0;
     }
+    cont_valves = 0;  
+      start = true;
+      timeElapsed = 0;
   }
+  
 
 }
 
@@ -124,21 +128,22 @@ ISR(TIMER1_COMPA_vect)
   if (start) {
     //LED1 Azul
       if (valve1_delay_passed == false) {
-        if (timeElapsed > delay1) {
+        if (timeElapsed >= delay1) {
           delay1 = -1;
           valve1_delay_passed = true;
           Serial.println(delay2);
           ledState = !ledState;
           Serial.println(timeElapsed);
           Serial.println(ledState);
-          digitalWrite(LEDPIN, ledState);
+          digitalWrite(LEDPIN, HIGH);
           time_started1 = long(timeElapsed);       
         }
       }
       
       //LED2 Blanco
       if (valve2_delay_passed == false) {
-        if (timeElapsed > delay2) {
+        if (timeElapsed >= delay2) {
+          Serial.println("yop");
           delay2 = -1;
           valve2_delay_passed = true;
           Serial.println(ledState2);

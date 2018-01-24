@@ -338,7 +338,7 @@ class Valvulas(QMainWindow,
         #                                                   listy, self.plot_settings['separator'], self.filename, self)
         # self.save_data.start()
         progressDialog.show()
-
+        # TODO check if filename is null
         try:
             my_home = os.path.expanduser('~')
             file_name = QFileDialog.getOpenFileName(self, 'Open File', my_home, '*.txt')
@@ -377,6 +377,7 @@ class Arduino_Communication(QThread):
     def run(self):
         try:
             self.serial_connection = serial.Serial(self.device, 9600, timeout=4, write_timeout=4)
+            print self.list_data
             for count, elem_string in enumerate(self.list_data, 0):
                 tries = 0
                 self.sleep(2)
@@ -387,17 +388,16 @@ class Arduino_Communication(QThread):
                     self.serial_connection.flushInput()
                     if data:
                         if data.replace('\r\n', '') == self.list_data[count]:
-                            print data
+                            print ("receive", data)
                             self.serial_connection.write('OK')
-                            self.sleep(2)
+                            self.serial_connection.flushOutput()
+                            # self.sleep(2)
                             break
                 if tries >= 4:
                     print "retries err"
                     raise Connection_TimeOut_Arduino()
-            self.serial_connection.write('DONE')
-            while(True):
-                data_me = self.serial_connection.readline()
-                print data_me
+            # self.serial_connection.write('--DONE--')
+
         except (serial.SerialException, Connection_TimeOut_Arduino):
             print "closed err"
             try:
