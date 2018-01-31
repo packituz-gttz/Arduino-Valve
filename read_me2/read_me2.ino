@@ -169,8 +169,9 @@ void loop()
       
       
     }
-    else if (String("DONE") == data) {
-      
+    else if (String("KILL") == data) {
+      time_out1 = 0;
+      time_out2 = 0;
       
     }
     else if (String("KO") == data) {

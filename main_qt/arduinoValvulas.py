@@ -118,8 +118,19 @@ class Valvulas(QMainWindow,
 
         self.myMapper.mapped['int'].connect(self.print_me)
 
+        self.button_stop.clicked.connect(self.stop_all)
+
     def print_me(self):
         print "ok"
+
+    def stop_all(self):
+        self.thread_connection = Arduino_Communication(str(self.arduino_combobox.currentText()))
+        self.thread_connection.start()
+        self.btn_execute.setEnabled(False)
+        self.button_stop.setEnabled(False)
+        self.thread_connection.finished.connect(self.finished_thread)
+        self.thread_connection.connection_error.connect(self.finished_thread)
+        self.thread_connection.connection_success.connect(self.finished_thread)
 
     def createToolBar(self):
 
@@ -225,6 +236,7 @@ class Valvulas(QMainWindow,
             self.thread_connection = Arduino_Communication(str(self.arduino_combobox.currentText()), list_strings)
             self.thread_connection.start()
             self.btn_execute.setEnabled(False)
+            self.button_stop.setEnabled(False)
             self.thread_connection.finished.connect(self.finished_thread)
             self.thread_connection.connection_error.connect(self.finished_thread)
             self.thread_connection.connection_success.connect(self.finished_thread)
@@ -239,6 +251,7 @@ class Valvulas(QMainWindow,
             QMessageBox.information(self, 'Connection Successful', "Connection to arduino was a success", QMessageBox.Ok)
             return
         self.btn_execute.setEnabled(True)
+        self.button_stop.setEnabled(True)
         self.statusBar1.clear()
 
     @pyqtSignature("")
@@ -397,26 +410,32 @@ class Arduino_Communication(QThread):
     def run(self):
         try:
             self.serial_connection = serial.Serial(self.device, 9600, timeout=4, write_timeout=4)
-            print self.list_data
-            for count, elem_string in enumerate(self.list_data, 0):
-                tries = 0
+            if len(self.list_data) == 0:
+                print "None, kill all valves"
                 self.sleep(2)
-                self.serial_connection.write(self.list_data[count])
+                self.serial_connection.write("KILL")
                 self.serial_connection.flushOutput()
-                while tries < 4:
-                    data = self.serial_connection.readline()
-                    self.serial_connection.flushInput()
-                    if data:
-                        if data.replace('\r\n', '') == self.list_data[count]:
-                            print ("receive", data)
-                            self.serial_connection.write('OK')
-                            self.serial_connection.flushOutput()
-                            # self.sleep(2)
-                            break
-                if tries >= 4:
-                    print "retries err"
-                    raise Connection_TimeOut_Arduino()
-            # self.serial_connection.write('--DONE--')
+            else:
+                print self.list_data
+                for count, elem_string in enumerate(self.list_data, 0):
+                    tries = 0
+                    self.sleep(2)
+                    self.serial_connection.write(self.list_data[count])
+                    self.serial_connection.flushOutput()
+                    while tries < 4:
+                        data = self.serial_connection.readline()
+                        self.serial_connection.flushInput()
+                        if data:
+                            if data.replace('\r\n', '') == self.list_data[count]:
+                                print ("receive", data)
+                                self.serial_connection.write('OK')
+                                self.serial_connection.flushOutput()
+                                # self.sleep(2)
+                                break
+                    if tries >= 4:
+                        print "retries err"
+                        raise Connection_TimeOut_Arduino()
+                # self.serial_connection.write('--DONE--')
         except (serial.SerialException, Connection_TimeOut_Arduino):
             print "closed err"
             try:
