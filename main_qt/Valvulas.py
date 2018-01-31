@@ -25,9 +25,9 @@ except AttributeError:
 class Ui_ValvulasMainWindow(object):
     def setupUi(self, ValvulasMainWindow):
         ValvulasMainWindow.setObjectName(_fromUtf8("ValvulasMainWindow"))
-        ValvulasMainWindow.resize(620, 640)
-        ValvulasMainWindow.setMinimumSize(QtCore.QSize(620, 640))
-        ValvulasMainWindow.setMaximumSize(QtCore.QSize(620, 640))
+        ValvulasMainWindow.resize(620, 670)
+        ValvulasMainWindow.setMinimumSize(QtCore.QSize(620, 670))
+        ValvulasMainWindow.setMaximumSize(QtCore.QSize(620, 670))
         self.centralwidget = QtGui.QWidget(ValvulasMainWindow)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -571,6 +571,9 @@ class Ui_ValvulasMainWindow(object):
         self.edit8_totals.setGeometry(QtCore.QRect(550, 460, 31, 32))
         self.edit8_totals.setInputMethodHints(QtCore.Qt.ImhNone)
         self.edit8_totals.setObjectName(_fromUtf8("edit8_totals"))
+        self.button_stop = QtGui.QPushButton(self.centralwidget)
+        self.button_stop.setGeometry(QtCore.QRect(180, 570, 94, 32))
+        self.button_stop.setObjectName(_fromUtf8("button_stop"))
         ValvulasMainWindow.setCentralWidget(self.centralwidget)
         self.statusBar1 = QtGui.QStatusBar(ValvulasMainWindow)
         self.statusBar1.setObjectName(_fromUtf8("statusBar1"))
@@ -805,5 +808,6 @@ class Ui_ValvulasMainWindow(object):
         self.edit6_totals.setText(_translate("ValvulasMainWindow", "0", None))
         self.edit7_totals.setText(_translate("ValvulasMainWindow", "0", None))
         self.edit8_totals.setText(_translate("ValvulasMainWindow", "0", None))
+        self.button_stop.setText(_translate("ValvulasMainWindow", "Detener", None))
         self.toolBar1.setWindowTitle(_translate("ValvulasMainWindow", "toolBar", None))
 
