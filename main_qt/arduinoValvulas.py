@@ -5,6 +5,7 @@ from PyQt4.QtCore import (Qt, pyqtSignature, QSignalMapper, QRegExp, QThread, QE
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QKeySequence, QRegExpValidator, QLabel, QFrame, QIcon, QAction,
                          QComboBox, QMessageBox, QProgressDialog)
 import Valvulas
+
 from PyQt4.QtCore import pyqtSignal as Signal
 
 class Connection_TimeOut_Arduino(Exception):
