@@ -32,8 +32,8 @@ int cont_valves = 0;
 int number_valves = 7;
 long i = 0;
 
-unsigned long delay1 = 9000;
-unsigned long delay2 = 6000;
+unsigned long delay1 = 0;
+unsigned long delay2 = 0;
 unsigned long delay3 = 9000;
 unsigned long delay4 = 6000;
 unsigned long delay5 = 9000;
@@ -41,8 +41,8 @@ unsigned long delay6 = 6000;
 unsigned long delay7 = 9000;
 unsigned long delay8 = 6000;
 
-unsigned long on1 = 5000;
-unsigned long on2 = 2000;
+unsigned long on1 = 0;
+unsigned long on2 = 0;
 unsigned long on3 = 5000;
 unsigned long on4 = 9000;
 unsigned long on5 = 5000;
@@ -160,8 +160,9 @@ void loop()
         if (sscanf(myChar2, "%lu;%lu;%lu;%lu;", &delay2, &on2, &off2, &time_out2) == 4) {
         }
         cont_valves = 0;
-        start = true;
         timeElapsed = 0;
+        start = true;
+        
       }
       else {
         cont_valves++;
@@ -180,51 +181,35 @@ void loop()
     else {
       if (cont_valves == 0){
         valve_data1 = data;// read the incoming data as string
-        digitalWrite(LEDPIN2, HIGH);
         delay(1);
-        digitalWrite(LEDPIN2, LOW);
       }
       else if(cont_valves == 1) {
         valve_data2 = data;// read the incoming data as string
-        digitalWrite(LEDPIN2, HIGH);
         delay(1);
-        digitalWrite(LEDPIN2, LOW);
       }
       else if(cont_valves == 2) {
         valve_data3 = data;// read the incoming data as string
-        digitalWrite(LEDPIN2, HIGH);
         delay(1);
-        digitalWrite(LEDPIN2, LOW);
       }
       else if(cont_valves == 3) {
         valve_data4 = data;// read the incoming data as string
-        digitalWrite(LEDPIN2, HIGH);
         delay(1);
-        digitalWrite(LEDPIN2, LOW);
       }
       else if(cont_valves == 4) {
         valve_data5 = data;// read the incoming data as string
-        digitalWrite(LEDPIN2, HIGH);
         delay(1);
-        digitalWrite(LEDPIN2, LOW);
       }
       else if(cont_valves == 5) {
         valve_data6 = data;// read the incoming data as string
-        digitalWrite(LEDPIN2, HIGH);
         delay(1);
-        digitalWrite(LEDPIN2, LOW);
       }
       else if(cont_valves == 6) {
         valve_data7 = data;// read the incoming data as string
-        digitalWrite(LEDPIN2, HIGH);
         delay(1);
-        digitalWrite(LEDPIN2, LOW);
       }
       else if(cont_valves == 7) {
         valve_data8 = data;// read the incoming data as string
-        digitalWrite(LEDPIN2, HIGH);
         delay(1);
-        digitalWrite(LEDPIN2, LOW);
         }
         Serial.println(data);
       }
@@ -237,92 +222,151 @@ void loop()
 ISR(TIMER1_COMPA_vect)
 {
   if (start) {
-    //LED1 Azul
-      if (valve1_delay_passed == false && init_1 == true) {
-        if (timeElapsed >= delay1) {
-          delay1 = -1;
-          valve1_delay_passed = true;
-        
-          ledState = !ledState;
-          time_started1 = long(timeElapsed);
-          init_1 = false;
-        }
-      }
-      
-      //LED2 Blanco
-      if (valve2_delay_passed == false && init_2 == true) {
-        if (timeElapsed >= delay2) {
-          delay2 = -1;
-          valve2_delay_passed = true;
-          
-          ledState2 = !ledState2;
-          time_started2 = long(timeElapsed);
-          init_2 = false;
-        }
-      }
-      //ONs to turn off led
-      if (valve1_delay_passed == true) {
-        digitalWrite(LEDPIN, HIGH);
-        
-        long var_time1 = long(timeElapsed) - time_started1;
-        if (var_time1 >= on1)
-        {
-          valve1_on_passed = true;
-          valve1_delay_passed = false;
-          time_started1 = long(timeElapsed);
-        }
-      }
 
-      if (valve2_delay_passed == true) {
-        digitalWrite(LEDPIN2, HIGH);
-        
-        long var_time2 = long(timeElapsed) - time_started2;
-        if (var_time2 >= on2)
-        {
-          valve2_on_passed = true;
-          valve2_delay_passed = false;
-          time_started2 = long(timeElapsed);
-        }
-      }
 
-      if (valve1_on_passed == true) {
+      if ((time_out1 <= timeElapsed) && (time_out1 >= 0) ) {
         digitalWrite(LEDPIN, LOW);
-        long var_time1 = long(timeElapsed) - time_started1;
-        if (var_time1 >= off1)
-        {
-          valve1_off_passed = true;
-          valve1_on_passed = false;
-          time_started1 = long(timeElapsed);
-        }
-      }
 
-      if (valve2_on_passed == true) {
-        digitalWrite(LEDPIN2, LOW);
-        long var_time2 = long(timeElapsed) - time_started2;
-        if (var_time2 >= off2)
-        {
-          valve2_off_passed = true;
-          valve2_on_passed = false;
-          time_started2 = long(timeElapsed);
-        }
-      }
-
-      if (time_out1 <= timeElapsed and time_out1 >= 0 ) {
-        digitalWrite(LEDPIN, LOW);
         off1 = 0;
         on1 = 0;
         delay1 = 0;
+        valve1_on_passed = false;
+        valve1_delay_passed = false;
         time_out1 = -1;
+        init_1 = false;
       }
 
-      if (time_out2 <= timeElapsed and time_out2 >= 0 ) {
+      if (time_out1 != -1) {
+        //LED1 Azul
+        if (valve1_delay_passed == false && init_1 == true) {
+          
+          if (long(timeElapsed) >= delay1) { 
+            valve1_delay_passed = true;
+            time_started1 = long(timeElapsed);
+            init_1 = false;
+          }
+        }
+              
+        //Turn ON led
+        if (valve1_delay_passed == true) {
+          digitalWrite(LEDPIN, HIGH);
+          long var_time1 = long(timeElapsed) - time_started1;
+          if (var_time1 >= on1)
+          {
+            valve1_on_passed = true;
+            valve1_delay_passed = false;
+            time_started1 = long(timeElapsed);
+          }
+        }
+     
+        //Turn OFF Led
+        if (valve1_on_passed == true) {
+          digitalWrite(LEDPIN, LOW);
+          long var_time1 = long(timeElapsed) - time_started1;
+          if (var_time1 >= off1)
+          {
+            valve1_on_passed = false;
+            valve1_delay_passed = true;
+            time_started1 = long(timeElapsed);
+          }
+        }
+      }
+    
+/////////////////////////////////////
+
+
+    if ((time_out2 <= timeElapsed) && (time_out2 >= 0) ) {
         digitalWrite(LEDPIN2, LOW);
+
         off2 = 0;
         on2 = 0;
         delay2 = 0;
+        valve2_on_passed = false;
+        valve2_delay_passed = false;
         time_out2 = -1;
+        init_2 = false;
       }
 
+      if (time_out2 != -1) {
+        //LED1 Azul
+        if (valve2_delay_passed == false && init_2 == true) {
+          
+          if (long(timeElapsed) >= delay2) {
+            valve2_delay_passed = true;
+            time_started2 = long(timeElapsed);
+            init_2 = false;
+          }
+        }
+              
+        //Turn ON led
+        if (valve2_delay_passed == true) {
+          digitalWrite(LEDPIN2, HIGH);
+          long var_time2 = long(timeElapsed) - time_started2;
+          if (var_time2 >= on2)
+          {
+            valve2_on_passed = true;
+            valve2_delay_passed = false;
+            time_started2 = long(timeElapsed);
+          }
+        }
+     
+        //Turn OFF Led
+        if (valve2_on_passed == true) {
+          digitalWrite(LEDPIN2, LOW);
+          long var_time2 = long(timeElapsed) - time_started2;
+          if (var_time2 >= off2)
+          {
+            valve2_on_passed = false;
+            valve2_delay_passed = true;
+            time_started2 = long(timeElapsed);
+          }
+        }
+      }
+
+
+//2nd
+      //LED2 Blanco
+//      if (valve2_delay_passed == false && init_2 == true) {
+//        if (timeElapsed >= delay2) {
+//          delay2 = -1;
+//          valve2_delay_passed = true;
+//          
+//          ledState2 = !ledState2;
+//          time_started2 = long(timeElapsed);
+//          init_2 = false;
+//        }
+//      }
+//
+//      if (valve2_delay_passed == true) {
+//        digitalWrite(LEDPIN2, HIGH);
+//        
+//        long var_time2 = long(timeElapsed) - time_started2;
+//        if (var_time2 >= on2)
+//        {
+//          valve2_on_passed = true;
+//          valve2_delay_passed = false;
+//          time_started2 = long(timeElapsed);
+//        }
+//      }
+//      
+//      if (valve2_on_passed == true) {
+//        digitalWrite(LEDPIN2, LOW);
+//        long var_time2 = long(timeElapsed) - time_started2;
+//        if (var_time2 >= off2)
+//        {
+//          valve2_off_passed = true;
+//          valve2_on_passed = false;
+//          time_started2 = long(timeElapsed);
+//        }
+//      }
+//
+//      if (time_out2 <= timeElapsed and time_out2 >= 0 ) {
+//        digitalWrite(LEDPIN2, LOW);
+//        off2 = 0;
+//        on2 = 0;
+//        delay2 = 0;
+//        time_out2 = -1;
+//      }
 
   }
   
