@@ -42,7 +42,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>1</string>
+     <string>&amp;1</string>
     </property>
     <property name="checkable">
      <bool>true</bool>
@@ -61,7 +61,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>2</string>
+     <string>&amp;2</string>
     </property>
     <property name="checkable">
      <bool>true</bool>
@@ -77,7 +77,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>3</string>
+     <string>&amp;3</string>
     </property>
     <property name="checkable">
      <bool>true</bool>
@@ -93,7 +93,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>4</string>
+     <string>&amp;4</string>
     </property>
     <property name="checkable">
      <bool>true</bool>
@@ -109,7 +109,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>5</string>
+     <string>&amp;5</string>
     </property>
     <property name="checkable">
      <bool>true</bool>
@@ -125,7 +125,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>6</string>
+     <string>&amp;6</string>
     </property>
     <property name="checkable">
      <bool>true</bool>
@@ -141,7 +141,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>7</string>
+     <string>&amp;7</string>
     </property>
     <property name="checkable">
      <bool>true</bool>
@@ -157,7 +157,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>8</string>
+     <string>&amp;8</string>
     </property>
     <property name="checkable">
      <bool>true</bool>
@@ -1358,7 +1358,7 @@
     <property name="geometry">
      <rect>
       <x>110</x>
-      <y>520</y>
+      <y>570</y>
       <width>96</width>
       <height>32</height>
      </rect>
@@ -1370,27 +1370,27 @@
    <widget class="QPushButton" name="btn_save">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>390</x>
       <y>520</y>
       <width>96</width>
       <height>32</height>
      </rect>
     </property>
     <property name="text">
-     <string>&amp;Guardar</string>
+     <string>Guardar &amp;Como</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btn_open">
     <property name="geometry">
      <rect>
-      <x>370</x>
+      <x>110</x>
       <y>520</y>
       <width>96</width>
       <height>32</height>
      </rect>
     </property>
     <property name="text">
-     <string>&amp;Open</string>
+     <string>&amp;Abrir</string>
     </property>
    </widget>
    <widget class="Line" name="line">
@@ -2083,7 +2083,7 @@
    <widget class="QPushButton" name="button_stop">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>390</x>
       <y>570</y>
       <width>94</width>
       <height>32</height>
@@ -2096,7 +2096,7 @@
    <widget class="QPushButton" name="btn_stop_usb">
     <property name="geometry">
      <rect>
-      <x>170</x>
+      <x>250</x>
       <y>570</y>
       <width>94</width>
       <height>32</height>
@@ -2104,6 +2104,19 @@
     </property>
     <property name="text">
      <string>&amp;Detener USB</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_save_2">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>520</y>
+      <width>96</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&amp;Guardar</string>
     </property>
    </widget>
   </widget>

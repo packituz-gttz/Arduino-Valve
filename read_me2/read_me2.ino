@@ -5,7 +5,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
  
-#define LEDPIN 13
+#define LEDPIN 9
 #define LEDPIN2 10
 
 // for checking elapsed time

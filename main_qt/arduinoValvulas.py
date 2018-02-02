@@ -1,7 +1,7 @@
 import os
 import serial
 import serial.tools.list_ports
-from PyQt4.QtCore import (Qt, pyqtSignature, QSignalMapper, QRegExp, QThread, QEvent, QObject)
+from PyQt4.QtCore import (Qt, pyqtSignature, QSignalMapper, QRegExp, QThread, QEvent, QObject, QString)
 from PyQt4.QtCore import pyqtSignal as Signal
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QKeySequence, QRegExpValidator, QLabel, QFrame, QIcon, QAction,
                          QComboBox, QMessageBox, QProgressDialog)
@@ -29,8 +29,10 @@ class Valvulas(QMainWindow,
         self.setupUi(self)
 
         self._filter = Filter()
+        self.filename = QString(u'')
         self.edit1_delayh.installEventFilter(self._filter)
-        self.btn_save.setShortcut(QKeySequence.Save)
+        # self.btn_save.setShortcut(QKeySequence.SaveAs)
+        # self.btn_save_2.setShortcut(QKeySequence.Save)
         self.sizeLabel = QLabel()
         self.sizeLabel.setFrameStyle(QFrame.StyledPanel | QFrame.Sunken)
         self.statusBar1.addPermanentWidget(self.sizeLabel)
@@ -137,7 +139,7 @@ class Valvulas(QMainWindow,
 
     def createToolBar(self):
 
-        self.label_arduino = QLabel('Connections: ')
+        self.label_arduino = QLabel('Dispositivos: ')
         self.toolBar1.addWidget(self.label_arduino)
 
         self.arduino_combobox = QComboBox()
@@ -194,6 +196,13 @@ class Valvulas(QMainWindow,
     @pyqtSignature("")
     def on_btn_save_clicked(self):
         self.saveFileAs()
+
+    @pyqtSignature("")
+    def on_btn_save_2_clicked(self):
+        if self.filename.isEmpty():
+            self.saveFileAs()
+        else:
+            self.writeDataToFile('w')
 
 # TODO check line 427 flushInput() raised Exception IMPORTANT
 # TODO change lineEdits to spinbox?
@@ -297,12 +306,13 @@ class Valvulas(QMainWindow,
         # else:
         #     self.edit1_delayh.setEnabled(False)
 
-    # TODO add save button?
+    # TODO add save button
     def saveFileAs(self):
         my_home = os.path.expanduser('~')
         self.filename = QFileDialog.getSaveFileName(self, 'Save As', os.path.join(my_home, "archivo.txt"), "", "",
                                                     QFileDialog.DontUseNativeDialog)
-        if self.filename:
+        print ("me", self.filename)
+        if not self.filename.isNull():
             self.writeDataToFile('w')
 
     def writeDataToFile(self, open_mode):
