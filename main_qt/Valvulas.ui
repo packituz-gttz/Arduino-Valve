@@ -1377,7 +1377,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Guardar</string>
+     <string>&amp;Guardar</string>
     </property>
    </widget>
    <widget class="QPushButton" name="btn_open">
@@ -2083,14 +2083,27 @@
    <widget class="QPushButton" name="button_stop">
     <property name="geometry">
      <rect>
-      <x>180</x>
+      <x>320</x>
       <y>570</y>
       <width>94</width>
       <height>32</height>
      </rect>
     </property>
     <property name="text">
-     <string>Detener</string>
+     <string>&amp;Para Valvulas</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_stop_usb">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>570</y>
+      <width>94</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&amp;Detener USB</string>
     </property>
    </widget>
   </widget>

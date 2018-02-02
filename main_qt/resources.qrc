@@ -1,0 +1,5 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+<file alias="reload.png">myImages/box-plot.png</file>
+</qresource>
+</RCC>

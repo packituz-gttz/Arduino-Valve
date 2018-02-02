@@ -1,28 +1,30 @@
+import os
 import serial
 import serial.tools.list_ports
-import os
 from PyQt4.QtCore import (Qt, pyqtSignature, QSignalMapper, QRegExp, QThread, QEvent, QObject)
+from PyQt4.QtCore import pyqtSignal as Signal
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QKeySequence, QRegExpValidator, QLabel, QFrame, QIcon, QAction,
                          QComboBox, QMessageBox, QProgressDialog)
 import Valvulas
-
-from PyQt4.QtCore import pyqtSignal as Signal
+import resources
 
 class Connection_TimeOut_Arduino(Exception):
     pass
 
+
 class Connection_Successful_Arduino(Exception):
     pass
 
+
 class Uncompatible_Data(Exception):
     pass
+
 
 # Main window imported from ui file
 class Valvulas(QMainWindow,
                Valvulas.Ui_ValvulasMainWindow):
     def __init__(self, parent=None):
         super(Valvulas, self).__init__(parent)
-
         self.myMapper = QSignalMapper(self)
         self.setupUi(self)
 
@@ -36,7 +38,7 @@ class Valvulas(QMainWindow,
         # self.checkArduinoState()
         self.createToolBar()
         self.updateDevicesList()
-        self.updateChoosenArduino()
+        self.button_stop.clicked.connect(self.stop_all)
         # List of valve pushbuttons
         self.valve_list = [self.valve1, self.valve2, self.valve3, self.valve4,
                            self.valve5, self.valve6, self.valve7, self.valve8]
@@ -81,8 +83,8 @@ class Valvulas(QMainWindow,
                                 self.edit8_offh, self.edit8_offm, self.edit8_offs,
                                 self.edit8_totalh, self.edit8_totalm, self.edit8_totals)]
 
-        index = 1
-        for editLabels in self.lineEdits_list:
+        #index = 1
+        for index, editLabels in enumerate(self.lineEdits_list, 1):
             editLabels[0].installEventFilter(self._filter)
             editLabels[1].installEventFilter(self._filter)
             editLabels[2].installEventFilter(self._filter)
@@ -96,33 +98,33 @@ class Valvulas(QMainWindow,
             editLabels[10].installEventFilter(self._filter)
             editLabels[11].installEventFilter(self._filter)
 
+            self.myMapper.setMapping(self.valve_list[index - 1], index)
+            (self.valve_list[index - 1]).clicked.connect(self.myMapper.map)
+
             # Comment
-            self.myMapper.setMapping(editLabels[0], index)
-            editLabels[0].editingFinished.connect(self.myMapper.map)
+            # self.myMapper.setMapping(editLabels[0], index)
+            # editLabels[0].editingFinished.connect(self.myMapper.map)
+            #
+            # self.myMapper.setMapping(editLabels[1], index)
+            # editLabels[1].returnPressed .connect(self.myMapper.map)
+            #
+            # self.myMapper.setMapping(editLabels[2], index)
+            # editLabels[2].returnPressed.connect(self.myMapper.map)
+            #
+            # self.myMapper.setMapping(editLabels[3], index)
+            # editLabels[3].returnPressed.connect(self.myMapper.map)
+            #
+            # self.myMapper.setMapping(editLabels[4], index)
+            # editLabels[4].returnPressed.connect(self.myMapper.map)
+            #
+            # self.myMapper.setMapping(editLabels[5], index)
+            # editLabels[5].returnPressed.connect(self.myMapper.map)
+            #
+            # index = index + 1
+        self.myMapper.mapped['int'].connect(self.enable_fields)
+        #self.myMapper.mapped['int'].connect(self.print_me)
 
-            self.myMapper.setMapping(editLabels[1], index)
-            editLabels[1].returnPressed .connect(self.myMapper.map)
 
-            self.myMapper.setMapping(editLabels[2], index)
-            editLabels[2].returnPressed.connect(self.myMapper.map)
-
-            self.myMapper.setMapping(editLabels[3], index)
-            editLabels[3].returnPressed.connect(self.myMapper.map)
-
-            self.myMapper.setMapping(editLabels[4], index)
-            editLabels[4].returnPressed.connect(self.myMapper.map)
-
-            self.myMapper.setMapping(editLabels[5], index)
-            editLabels[5].returnPressed.connect(self.myMapper.map)
-
-            index = index + 1
-
-        self.myMapper.mapped['int'].connect(self.print_me)
-
-        self.button_stop.clicked.connect(self.stop_all)
-
-    def print_me(self):
-        print "ok"
 
     def stop_all(self):
         self.thread_connection = Arduino_Communication(str(self.arduino_combobox.currentText()))
@@ -141,7 +143,7 @@ class Valvulas(QMainWindow,
         self.arduino_combobox = QComboBox()
         self.arduino_combobox.setToolTip('Select Arduino')
         self.arduino_combobox.setFocusPolicy(Qt.NoFocus)
-        self.arduino_combobox.activated.connect(self.updateChoosenArduino)
+        # self.arduino_combobox.activated.connect(self.updateChoosenArduino)
 
         # Update List of Arduino devices
         self.reload = QAction(QIcon(":/reload.png"), "Reload", self)
@@ -152,30 +154,17 @@ class Valvulas(QMainWindow,
         self.toolBar1.addWidget(self.arduino_combobox)
         self.toolBar1.addAction(self.reload)
 
-    def connectArduino(self):
-        try:
-            self.serial_connection = serial.Serial(str(self.arduino_combobox.currentText()), 9600, timeout=1)
-        except serial.SerialException:
-            self.serial_connection.close()
-            print "Error connecting"
-
-    def updateChoosenArduino(self):
-        pass
-
-
     def updateDevicesList(self):
         device_list = serial.tools.list_ports.comports()
         current_arduino = self.arduino_combobox.currentText()
         self.arduino_combobox.clear()
-        device_index = 0
-        for device in sorted(device_list):
+        for device_index, device in enumerate(sorted(device_list)):
             self.arduino_combobox.addItem(device.device)
             if device.device == current_arduino:
                 self.arduino_combobox.setCurrentIndex(device_index)
-            device_index = device_index + 1
 
-    def calculateTime(self, index):
-        pass
+    # def calculateTime(self, index):
+    #     pass
         #print index
         # counter = 0
         # hours = 0
@@ -206,7 +195,8 @@ class Valvulas(QMainWindow,
     def on_btn_save_clicked(self):
         self.saveFileAs()
 
-    # TODO time conversion and validation to avoid unnecessary communication
+# TODO check line 427 flushInput() raised Exception IMPORTANT
+# TODO change lineEdits to spinbox?
     # 1hr --> 3600 sec
     # 1min --> 60 sec
     # 1sec --> 1 sec
@@ -259,62 +249,61 @@ class Valvulas(QMainWindow,
     def on_btn_open_clicked(self):
         self.openFile()
 
-    @pyqtSignature("")
-    def on_valve1_clicked(self):
-        self.enable_fields(1)
+    # @pyqtSignature("")
+    # def on_valve1_clicked(self):
+    #     self.enable_fields(1)
 
-    @pyqtSignature("")
-    def on_valve2_clicked(self):
-        self.enable_fields(2)
-
-    @pyqtSignature("")
-    def on_valve3_clicked(self):
-        self.enable_fields(3)
-
-    @pyqtSignature("")
-    def on_valve4_clicked(self):
-        self.enable_fields(4)
-
-    @pyqtSignature("")
-    def on_valve5_clicked(self):
-        self.enable_fields(5)
-
-    @pyqtSignature("")
-    def on_valve6_clicked(self):
-        self.enable_fields(6)
-
-    @pyqtSignature("")
-    def on_valve7_clicked(self):
-        self.enable_fields(7)
-
-    @pyqtSignature("")
-    def on_valve8_clicked(self):
-        self.enable_fields(8)
+    # @pyqtSignature("")
+    # def on_valve2_clicked(self):
+    #     self.enable_fields(2)
+    #
+    # @pyqtSignature("")
+    # def on_valve3_clicked(self):
+    #     self.enable_fields(3)
+    #
+    # @pyqtSignature("")
+    # def on_valve4_clicked(self):
+    #     self.enable_fields(4)
+    #
+    # @pyqtSignature("")
+    # def on_valve5_clicked(self):
+    #     self.enable_fields(5)
+    #
+    # @pyqtSignature("")
+    # def on_valve6_clicked(self):
+    #     self.enable_fields(6)
+    #
+    # @pyqtSignature("")
+    # def on_valve7_clicked(self):
+    #     self.enable_fields(7)
+    #
+    # @pyqtSignature("")
+    # def on_valve8_clicked(self):
+    #     self.enable_fields(8)
 
     # Enables/Disables lineedits for time inputs
     def enable_fields(self, index):
-        counter = 0
         hours_reg = QRegExp(r"([0-9])|([0-9][0-9][0-9])")
-        numeric_reg = QRegExp(r"([0-9])|([0-5][0-9])")
         sec_reg = QRegExp(r"([0-9])|([0-5][0-9])")
-        for line_edit in self.lineEdits_list[index - 1]:
+        for counter, line_edit in enumerate(self.lineEdits_list[index - 1]):
             # if counter < 6:
             line_edit.setEnabled(self.valve_list[index - 1].isChecked())
             if counter % 3 == 0:
                 line_edit.setValidator(QRegExpValidator(hours_reg, self))
             else:
                 line_edit.setValidator(QRegExpValidator(sec_reg, self))
-            counter = counter + 1
         # if self.valve_list[index-1].isChecked():
         #     self.edit1_delayh.setEnabled(True)
         # else:
         #     self.edit1_delayh.setEnabled(False)
 
+    # TODO add save button?
     def saveFileAs(self):
         my_home = os.path.expanduser('~')
         self.filename = QFileDialog.getSaveFileName(self, 'Save As', os.path.join(my_home, "archivo.txt"), "", "",
                                                     QFileDialog.DontUseNativeDialog)
-        self.writeDataToFile('w')
+        if self.filename:
+            self.writeDataToFile('w')
 
     def writeDataToFile(self, open_mode):
 
@@ -330,9 +319,7 @@ class Valvulas(QMainWindow,
 
         try:
             with open(self.filename, open_mode) as file_obj:
-                count = 1
-            #file_obj = open(self.filename, open_mode)
-                for elem_edit in self.lineEdits_list:
+                for count, elem_edit in enumerate(self.lineEdits_list, 1):
                     file_obj.write(''.join([str(elem_edit[0].text()), '\n']))
                     file_obj.write(''.join([str(elem_edit[1].text()), '\n']))
                     file_obj.write(''.join([str(elem_edit[2].text()), '\n']))
@@ -346,13 +333,10 @@ class Valvulas(QMainWindow,
                     file_obj.write(''.join([str(elem_edit[10].text()), '\n']))
                     file_obj.write(''.join([str(elem_edit[11].text()), '\n']))
                     progressDialog.setValue(count)
-                    print count
-                    count = count + 1
-            #file_obj.close()
         except (IOError, OSError):
             QMessageBox.critical(self, 'Error', 'Error while saving.', QMessageBox.Ok)
         else:
-            self.statusBar1.showMessage('Saved')
+            self.statusBar1.showMessage('Saved', 3000)
 
     def closeEvent(self, QCloseEvent):
         try:
@@ -362,47 +346,37 @@ class Valvulas(QMainWindow,
             print "Error closing"
 
     def openFile(self):
-
-        progressDialog = QProgressDialog()
-        progressDialog.setModal(True)
-        progressDialog.setLabelText('Opening...')
-        progressDialog.setMaximum(96)
-        progressDialog.setCancelButton(None)
         # self.save_data = SaveDataThread(listx,
         #                                                   listy, self.plot_settings['separator'], self.filename, self)
         # self.save_data.start()
-        progressDialog.show()
-        # TODO check if filename is null
         try:
             my_home = os.path.expanduser('~')
             file_name = QFileDialog.getOpenFileName(self, 'Open File', my_home, '*.txt')
             list_values = []
-            count_file = 0
-            with open(file_name) as fp:
-                for line in fp:
-                    list_values.extend([line.replace('\n', '')])
-                    count_file = count_file + 1
-                    progressDialog.setValue(count_file)
-            print list_values
-            count = 0
-            for elems in self.lineEdits_list:
-                for inner_elem in elems:
-                    if not unicode(list_values[count]).isdigit():
-                        raise Uncompatible_Data()
-                    inner_elem.setText(list_values[count])
-                    count = count + 1
+            if file_name:
+                with open(file_name) as fp:
+                    for line in fp:
+                        print line
+                        if unicode(line.replace('\n', '')).isdigit():
+                            list_values.extend([line.replace('\n', '')])
+                        else:
+                            raise Uncompatible_Data()
+                print list_values
+                for count, elems in enumerate(self.lineEdits_list):
+                    for inner_elem in elems:
+                        inner_elem.setText(list_values[count])
 
         except (IOError, OSError):
             QMessageBox.critical(self, 'Error', 'Unable to open file.', QMessageBox.Ok)
         except (IndexError, Uncompatible_Data):
             QMessageBox.warning(self, 'Warning', 'Uncompatible format', QMessageBox.Ok)
 
-
+# TODO rebuild GUI and add Stop to Serial
 class Arduino_Communication(QThread):
     connection_error = Signal(str)
     connection_success = Signal(str)
 
-    def __init__(self, device=None, list_data=[], parent=None):
+    def __init__(self, device=None, list_data='', parent=None):
         super(Arduino_Communication, self).__init__(parent)
         self.device = device
         self.list_data = list_data
@@ -411,39 +385,48 @@ class Arduino_Communication(QThread):
     def run(self):
         try:
             self.serial_connection = serial.Serial(self.device, 9600, timeout=4, write_timeout=4)
-            if len(self.list_data) == 0:
+            if not self.list_data:
                 print "None, kill all valves"
                 self.sleep(2)
                 self.serial_connection.write("KILL")
                 self.serial_connection.flushOutput()
+                # raise Connection_Killed()
             else:
                 print self.list_data
                 for count, elem_string in enumerate(self.list_data, 0):
                     tries = 0
                     self.sleep(2)
+                    print "post sleep"
                     self.serial_connection.write(self.list_data[count])
-                    self.serial_connection.flushOutput()
+                    print "post write"
+                    # self.serial_connection.flushOutput()
                     while tries < 4:
                         data = self.serial_connection.readline()
-                        self.serial_connection.flushInput()
+                        # self.serial_connection.flushInput()
                         if data:
                             if data.replace('\r\n', '') == self.list_data[count]:
                                 print ("receive", data)
                                 self.serial_connection.write('OK')
-                                self.serial_connection.flushOutput()
+                                # self.serial_connection.flushOutput()
                                 # self.sleep(2)
                                 break
+                        print "err data me"
+                        tries = tries + 1
+
                     if tries >= 4:
                         print "retries err"
                         raise Connection_TimeOut_Arduino()
                 # self.serial_connection.write('--DONE--')
+        # TODO Check if KO is still used
         except (serial.SerialException, Connection_TimeOut_Arduino):
             print "closed err"
             try:
-                self.serial_connection.write('KO')
+                #TODO check if this affects
+                # self.serial_connection.write('KO')
                 self.serial_connection.close()
             except AttributeError:
                 print "No such object"
+            print "err"
             self.connection_error.emit('error')
         else:
             self.connection_success.emit('success')
