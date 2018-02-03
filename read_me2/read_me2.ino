@@ -34,21 +34,21 @@ long i = 0;
 
 unsigned long delay1 = 0;
 unsigned long delay2 = 0;
-unsigned long delay3 = 9000;
-unsigned long delay4 = 6000;
-unsigned long delay5 = 9000;
-unsigned long delay6 = 6000;
-unsigned long delay7 = 9000;
-unsigned long delay8 = 6000;
+unsigned long delay3 = 0;
+unsigned long delay4 = 0;
+unsigned long delay5 = 0;
+unsigned long delay6 = 0;
+unsigned long delay7 = 0;
+unsigned long delay8 = 0;
 
 unsigned long on1 = 0;
 unsigned long on2 = 0;
-unsigned long on3 = 5000;
-unsigned long on4 = 9000;
-unsigned long on5 = 5000;
-unsigned long on6 = 9000;
-unsigned long on7 = 5000;
-unsigned long on8 = 9000;
+unsigned long on3 = 0;
+unsigned long on4 = 0;
+unsigned long on5 = 0;
+unsigned long on6 = 0;
+unsigned long on7 = 0;
+unsigned long on8 = 0;
 
 unsigned long time_started1 = 0;
 unsigned long time_started2 = 0;
@@ -60,13 +60,13 @@ unsigned long time_started7 = 0;
 unsigned long time_started8 = 0;
 
 long off1 = 0;
-long off2 = 3000;
+long off2 = 0;
 long off3 = 0;
-long off4 = 3000;
+long off4 = 0;
 long off5 = 0;
-long off6 = 3000;
+long off6 = 0;
 long off7 = 0;
-long off8 = 3000;
+long off8 = 0;
 
 boolean valve1_delay_passed = false;
 boolean valve2_delay_passed = false;
@@ -98,6 +98,12 @@ boolean valve8_off_passed = false;
 //Time out vars?
 unsigned long time_out1 = 0;
 unsigned long time_out2 = 0;
+unsigned long time_out3 = 0;
+unsigned long time_out4 = 0;
+unsigned long time_out5 = 0;
+unsigned long time_out6 = 0;
+unsigned long time_out7 = 0;
+unsigned long time_out8 = 0;
 
 
 boolean start = false;

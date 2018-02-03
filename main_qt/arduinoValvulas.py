@@ -125,7 +125,15 @@ class Valvulas(QMainWindow,
             # index = index + 1
         self.myMapper.mapped['int'].connect(self.enable_fields)
         #self.myMapper.mapped['int'].connect(self.print_me)
+        self.btn_stop_usb.clicked.connect(self.stop_usb)
 
+    def stop_usb(self):
+        try:
+            print self.thread_connection.isRunning()
+            if self.thread_connection.isRunning():
+                self.thread_connection.terminate()
+        except AttributeError:
+            pass
 
 
     def stop_all(self):
@@ -148,7 +156,7 @@ class Valvulas(QMainWindow,
         # self.arduino_combobox.activated.connect(self.updateChoosenArduino)
 
         # Update List of Arduino devices
-        self.reload = QAction(QIcon(":/reload.png"), "Reload", self)
+        self.reload = QAction(QIcon(":/reload.png"), "&Reload", self)
         self.reload.setShortcut(QKeySequence.Refresh)
         self.reload.setToolTip('Reload Devices')
         self.reload.triggered.connect(self.updateDevicesList)
@@ -363,18 +371,19 @@ class Valvulas(QMainWindow,
             my_home = os.path.expanduser('~')
             file_name = QFileDialog.getOpenFileName(self, 'Open File', my_home, '*.txt')
             list_values = []
-            if file_name:
+            if not file_name.isNull():
                 with open(file_name) as fp:
                     for line in fp:
-                        print line
-                        if unicode(line.replace('\n', '')).isdigit():
-                            list_values.extend([line.replace('\n', '')])
-                        else:
-                            raise Uncompatible_Data()
+                        list_values.extend([line.replace('\n', '')])
+
                 print list_values
-                for count, elems in enumerate(self.lineEdits_list):
+                count = 0
+                for elems in self.lineEdits_list:
                     for inner_elem in elems:
+                        if not unicode(list_values[count]).isdigit():
+                            raise Uncompatible_Data()
                         inner_elem.setText(list_values[count])
+                        count = count + 1
 
         except (IOError, OSError):
             QMessageBox.critical(self, 'Error', 'Unable to open file.', QMessageBox.Ok)
