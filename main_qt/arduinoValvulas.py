@@ -141,6 +141,7 @@ class Valvulas(QMainWindow,
         self.thread_connection.start()
         self.btn_execute.setEnabled(False)
         self.button_stop.setEnabled(False)
+        self.btn_stop_usb.setEnabled(False)
         self.thread_connection.finished.connect(self.finished_thread)
         self.thread_connection.connection_error.connect(self.finished_thread)
         self.thread_connection.connection_success.connect(self.finished_thread)
@@ -213,7 +214,6 @@ class Valvulas(QMainWindow,
             self.writeDataToFile('w')
 
 # TODO check line 427 flushInput() raised Exception IMPORTANT
-# TODO change lineEdits to spinbox?
     # 1hr --> 3600 sec
     # 1min --> 60 sec
     # 1sec --> 1 sec
@@ -260,6 +260,7 @@ class Valvulas(QMainWindow,
             return
         self.btn_execute.setEnabled(True)
         self.button_stop.setEnabled(True)
+        self.btn_stop_usb.setEnabled(True)
         self.statusBar1.clear()
 
     @pyqtSignature("")
@@ -314,7 +315,6 @@ class Valvulas(QMainWindow,
         # else:
         #     self.edit1_delayh.setEnabled(False)
 
-    # TODO add save button
     def saveFileAs(self):
         my_home = os.path.expanduser('~')
         self.filename = QFileDialog.getSaveFileName(self, 'Save As', os.path.join(my_home, "archivo.txt"), "", "",
@@ -390,7 +390,6 @@ class Valvulas(QMainWindow,
         except (IndexError, Uncompatible_Data):
             QMessageBox.warning(self, 'Warning', 'Uncompatible format', QMessageBox.Ok)
 
-# TODO rebuild GUI and add Stop to Serial
 class Arduino_Communication(QThread):
     connection_error = Signal(str)
     connection_success = Signal(str)

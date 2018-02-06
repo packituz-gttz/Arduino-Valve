@@ -5,8 +5,15 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
  
-#define LEDPIN 9
-#define LEDPIN2 10
+#define LEDPIN 2
+#define LEDPIN2 3
+#define LEDPIN3 4
+#define LEDPIN4 5
+#define LEDPIN5 6
+#define LEDPIN6 7
+#define LEDPIN7 8
+#define LEDPIN8 9
+
 
 // for checking elapsed time
 #include <elapsedMillis.h>
@@ -125,6 +132,13 @@ void setup()
   Serial.begin(9600);
     pinMode(LEDPIN, OUTPUT);
     pinMode(LEDPIN2, OUTPUT);
+    pinMode(LEDPIN3, OUTPUT);
+    pinMode(LEDPIN4, OUTPUT);
+    pinMode(LEDPIN5, OUTPUT);
+    pinMode(LEDPIN6, OUTPUT);
+    pinMode(LEDPIN7, OUTPUT);
+    pinMode(LEDPIN8, OUTPUT);
+    
  
     // initialize Timer1
     cli();          // disable global interrupts
@@ -160,11 +174,35 @@ void loop()
         valve_data1.toCharArray(myChar, valve_data1.length());
         if (sscanf(myChar, "%lu;%lu;%lu;%lu;", &delay1, &on1, &off1, &time_out1) == 4) {
         }
-        Serial.println(valve_data2);
         char myChar2[45];
         valve_data2.toCharArray(myChar2, valve_data2.length());
         if (sscanf(myChar2, "%lu;%lu;%lu;%lu;", &delay2, &on2, &off2, &time_out2) == 4) {
         }
+        char myChar3[45];
+        valve_data3.toCharArray(myChar3, valve_data3.length());
+        if (sscanf(myChar3, "%lu;%lu;%lu;%lu;", &delay3, &on3, &off3, &time_out3) == 4) {
+        }
+        char myChar4[45];
+        valve_data4.toCharArray(myChar4, valve_data4.length());
+        if (sscanf(myChar4, "%lu;%lu;%lu;%lu;", &delay4, &on4, &off4, &time_out4) == 4) {
+        }
+        char myChar5[45];
+        valve_data5.toCharArray(myChar5, valve_data5.length());
+        if (sscanf(myChar5, "%lu;%lu;%lu;%lu;", &delay5, &on5, &off5, &time_out5) == 4) {
+        }
+        char myChar6[45];
+        valve_data6.toCharArray(myChar6, valve_data6.length());
+        if (sscanf(myChar6, "%lu;%lu;%lu;%lu;", &delay6, &on6, &off6, &time_out6) == 4) {
+        }
+        char myChar7[45];
+        valve_data7.toCharArray(myChar7, valve_data7.length());
+        if (sscanf(myChar7, "%lu;%lu;%lu;%lu;", &delay7, &on7, &off7, &time_out7) == 4) {
+        }
+        char myChar8[45];
+        valve_data8.toCharArray(myChar8, valve_data8.length());
+        if (sscanf(myChar8, "%lu;%lu;%lu;%lu;", &delay8, &on8, &off8, &time_out8) == 4) {
+        }
+        
         cont_valves = 0;
         timeElapsed = 0;
         start = true;
@@ -179,8 +217,28 @@ void loop()
     else if (String("KILL") == data) {
       time_out1 = 0;
       time_out2 = 0;
+      time_out3 = 0;
+      time_out4 = 0;
+      time_out5 = 0;
+      time_out6 = 0;
+      time_out7 = 0;
+      time_out8 = 0;
+
+      
+      cont_valves = 0;
+      timeElapsed = 0;
+      start = false;
+      digitalWrite(LEDPIN, LOW);
+      digitalWrite(LEDPIN2, LOW);
+      digitalWrite(LEDPIN3, LOW);
+      digitalWrite(LEDPIN4, LOW);
+      digitalWrite(LEDPIN5, LOW);
+      digitalWrite(LEDPIN6, LOW);
+      digitalWrite(LEDPIN7, LOW);
+      digitalWrite(LEDPIN8, LOW);      
       
     }
+    // Still used
     else if (String("KO") == data) {
       cont_valves=0;
     }
@@ -328,6 +386,313 @@ ISR(TIMER1_COMPA_vect)
           }
         }
       }
+
+
+//3rd
+
+    if ((time_out3 <= timeElapsed) && (time_out3 >= 0) ) {
+        digitalWrite(LEDPIN3, LOW);
+
+        off3 = 0;
+        on3 = 0;
+        delay3 = 0;
+        valve3_on_passed = false;
+        valve3_delay_passed = false;
+        time_out3 = -1;
+        init_3 = false;
+      }
+
+      if (time_out3 != -1) {
+        //LED1 Azul
+        if (valve3_delay_passed == false && init_3 == true) {
+          
+          if (long(timeElapsed) >= delay3) {
+            valve3_delay_passed = true;
+            time_started3 = long(timeElapsed);
+            init_3 = false;
+          }
+        }
+              
+        //Turn ON led
+        if (valve3_delay_passed == true) {
+          digitalWrite(LEDPIN3, HIGH);
+          long var_time3 = long(timeElapsed) - time_started3;
+          if (var_time3 >= on3)
+          {
+            valve3_on_passed = true;
+            valve3_delay_passed = false;
+            time_started3 = long(timeElapsed);
+          }
+        }
+     
+        //Turn OFF Led
+        if (valve3_on_passed == true) {
+          digitalWrite(LEDPIN3, LOW);
+          long var_time3 = long(timeElapsed) - time_started3;
+          if (var_time3 >= off3)
+          {
+            valve3_on_passed = false;
+            valve3_delay_passed = true;
+            time_started3 = long(timeElapsed);
+          }
+        }
+      }
+
+// 4th
+
+
+    if ((time_out4 <= timeElapsed) && (time_out4 >= 0) ) {
+        digitalWrite(LEDPIN4, LOW);
+
+        off4 = 0;
+        on4 = 0;
+        delay4 = 0;
+        valve4_on_passed = false;
+        valve4_delay_passed = false;
+        time_out4 = -1;
+        init_4 = false;
+      }
+
+      if (time_out4 != -1) {
+        //LED1 Azul
+        if (valve4_delay_passed == false && init_4 == true) {
+          
+          if (long(timeElapsed) >= delay4) {
+            valve4_delay_passed = true;
+            time_started4 = long(timeElapsed);
+            init_4 = false;
+          }
+        }
+              
+        //Turn ON led
+        if (valve4_delay_passed == true) {
+          digitalWrite(LEDPIN4, HIGH);
+          long var_time4 = long(timeElapsed) - time_started4;
+          if (var_time4 >= on4)
+          {
+            valve4_on_passed = true;
+            valve4_delay_passed = false;
+            time_started4 = long(timeElapsed);
+          }
+        }
+     
+        //Turn OFF Led
+        if (valve4_on_passed == true) {
+          digitalWrite(LEDPIN4, LOW);
+          long var_time4 = long(timeElapsed) - time_started4;
+          if (var_time4 >= off4)
+          {
+            valve4_on_passed = false;
+            valve4_delay_passed = true;
+            time_started4 = long(timeElapsed);
+          }
+        }
+      }
+
+// 5th
+
+    if ((time_out5 <= timeElapsed) && (time_out5 >= 0) ) {
+        digitalWrite(LEDPIN5, LOW);
+
+        off5 = 0;
+        on5 = 0;
+        delay5 = 0;
+        valve5_on_passed = false;
+        valve5_delay_passed = false;
+        time_out5 = -1;
+        init_5 = false;
+      }
+
+      if (time_out5 != -1) {
+        //LED1 Azul
+        if (valve5_delay_passed == false && init_5 == true) {
+          
+          if (long(timeElapsed) >= delay5) {
+            valve5_delay_passed = true;
+            time_started5 = long(timeElapsed);
+            init_5 = false;
+          }
+        }
+              
+        //Turn ON led
+        if (valve5_delay_passed == true) {
+          digitalWrite(LEDPIN5, HIGH);
+          long var_time5 = long(timeElapsed) - time_started5;
+          if (var_time5 >= on5)
+          {
+            valve5_on_passed = true;
+            valve5_delay_passed = false;
+            time_started5 = long(timeElapsed);
+          }
+        }
+     
+        //Turn OFF Led
+        if (valve5_on_passed == true) {
+          digitalWrite(LEDPIN5, LOW);
+          long var_time5 = long(timeElapsed) - time_started5;
+          if (var_time5 >= off5)
+          {
+            valve5_on_passed = false;
+            valve5_delay_passed = true;
+            time_started5 = long(timeElapsed);
+          }
+        }
+      }
+
+
+// 6th
+
+    if ((time_out6 <= timeElapsed) && (time_out6 >= 0) ) {
+        digitalWrite(LEDPIN6, LOW);
+
+        off6 = 0;
+        on6 = 0;
+        delay6 = 0;
+        valve6_on_passed = false;
+        valve6_delay_passed = false;
+        time_out6 = -1;
+        init_6 = false;
+      }
+
+      if (time_out6 != -1) {
+        //LED1 Azul
+        if (valve6_delay_passed == false && init_6 == true) {
+          
+          if (long(timeElapsed) >= delay6) {
+            valve6_delay_passed = true;
+            time_started6 = long(timeElapsed);
+            init_6 = false;
+          }
+        }
+              
+        //Turn ON led
+        if (valve6_delay_passed == true) {
+          digitalWrite(LEDPIN6, HIGH);
+          long var_time6 = long(timeElapsed) - time_started6;
+          if (var_time6 >= on6)
+          {
+            valve6_on_passed = true;
+            valve6_delay_passed = false;
+            time_started6 = long(timeElapsed);
+          }
+        }
+     
+        //Turn OFF Led
+        if (valve6_on_passed == true) {
+          digitalWrite(LEDPIN6, LOW);
+          long var_time6 = long(timeElapsed) - time_started6;
+          if (var_time6 >= off6)
+          {
+            valve6_on_passed = false;
+            valve6_delay_passed = true;
+            time_started6 = long(timeElapsed);
+          }
+        }
+      }
+
+
+// 7th
+
+    if ((time_out7 <= timeElapsed) && (time_out7 >= 0) ) {
+        digitalWrite(LEDPIN7, LOW);
+
+        off7 = 0;
+        on7 = 0;
+        delay7 = 0;
+        valve7_on_passed = false;
+        valve7_delay_passed = false;
+        time_out7 = -1;
+        init_7 = false;
+      }
+
+      if (time_out7 != -1) {
+        //LED1 Azul
+        if (valve7_delay_passed == false && init_7 == true) {
+          
+          if (long(timeElapsed) >= delay7) {
+            valve7_delay_passed = true;
+            time_started7 = long(timeElapsed);
+            init_7 = false;
+          }
+        }
+              
+        //Turn ON led
+        if (valve7_delay_passed == true) {
+          digitalWrite(LEDPIN7, HIGH);
+          long var_time7 = long(timeElapsed) - time_started7;
+          if (var_time7 >= on7)
+          {
+            valve7_on_passed = true;
+            valve7_delay_passed = false;
+            time_started7 = long(timeElapsed);
+          }
+        }
+     
+        //Turn OFF Led
+        if (valve7_on_passed == true) {
+          digitalWrite(LEDPIN7, LOW);
+          long var_time7 = long(timeElapsed) - time_started7;
+          if (var_time7 >= off7)
+          {
+            valve7_on_passed = false;
+            valve7_delay_passed = true;
+            time_started7 = long(timeElapsed);
+          }
+        }
+      }
+      
+
+// 8th
+
+    if ((time_out8 <= timeElapsed) && (time_out8 >= 0) ) {
+        digitalWrite(LEDPIN8, LOW);
+
+        off8 = 0;
+        on8 = 0;
+        delay8 = 0;
+        valve8_on_passed = false;
+        valve8_delay_passed = false;
+        time_out8 = -1;
+        init_8 = false;
+      }
+
+      if (time_out8 != -1) {
+        //LED1 Azul
+        if (valve8_delay_passed == false && init_8 == true) {
+          
+          if (long(timeElapsed) >= delay8) {
+            valve8_delay_passed = true;
+            time_started8 = long(timeElapsed);
+            init_8 = false;
+          }
+        }
+              
+        //Turn ON led
+        if (valve8_delay_passed == true) {
+          digitalWrite(LEDPIN8, HIGH);
+          long var_time8 = long(timeElapsed) - time_started8;
+          if (var_time8 >= on8)
+          {
+            valve8_on_passed = true;
+            valve8_delay_passed = false;
+            time_started8 = long(timeElapsed);
+          }
+        }
+     
+        //Turn OFF Led
+        if (valve8_on_passed == true) {
+          digitalWrite(LEDPIN8, LOW);
+          long var_time8 = long(timeElapsed) - time_started8;
+          if (var_time8 >= off8)
+          {
+            valve8_on_passed = false;
+            valve8_delay_passed = true;
+            time_started8 = long(timeElapsed);
+          }
+        }
+      }
+
+
 
 
 //2nd
