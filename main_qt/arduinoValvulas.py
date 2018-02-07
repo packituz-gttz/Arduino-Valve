@@ -10,6 +10,7 @@ from PyQt4.QtGui import (QMainWindow, QFileDialog, QKeySequence, QRegExpValidato
 import Valvulas
 import resources
 
+
 class Connection_TimeOut_Arduino(Exception):
     pass
 
@@ -27,10 +28,10 @@ class Connection_Killed(Exception):
 
 
 # Main window imported from ui file
-class Valvulas(QMainWindow,
+class ValvulasMainWindow(QMainWindow,
                Valvulas.Ui_ValvulasMainWindow):
     def __init__(self, parent=None):
-        super(Valvulas, self).__init__(parent)
+        super(ValvulasMainWindow, self).__init__(parent)
         self.myMapper = QSignalMapper(self)
         self.setupUi(self)
 
@@ -91,7 +92,7 @@ class Valvulas(QMainWindow,
                                 self.edit8_offh, self.edit8_offm, self.edit8_offs,
                                 self.edit8_totalh, self.edit8_totalm, self.edit8_totals)]
 
-        #index = 1
+        # index = 1
         for index, editLabels in enumerate(self.lineEdits_list, 1):
             editLabels[0].installEventFilter(self._filter)
             editLabels[1].installEventFilter(self._filter)
@@ -153,18 +154,18 @@ class Valvulas(QMainWindow,
 
     def createToolBar(self):
 
-        self.label_arduino = QLabel('Dispositivos: ')
+        self.label_arduino = QLabel(self.tr('Dispositivos: '))
         self.toolBar1.addWidget(self.label_arduino)
 
         self.arduino_combobox = QComboBox()
-        self.arduino_combobox.setToolTip('Select Arduino')
+        self.arduino_combobox.setToolTip(self.tr('Seleccionar Arduino'))
         self.arduino_combobox.setFocusPolicy(Qt.NoFocus)
         # self.arduino_combobox.activated.connect(self.updateChoosenArduino)
 
         # Update List of Arduino devices
-        self.reload = QAction(QIcon(":/reload.png"), "&Refrescar", self)
+        self.reload = QAction(QIcon(":/reload.png"), self.tr("&Refrescar"), self)
         self.reload.setShortcut(QKeySequence.Refresh)
-        self.reload.setToolTip('Refrescar Dispositivos')
+        self.reload.setToolTip(self.tr('Refrescar Dispositivos'))
         self.reload.triggered.connect(self.updateDevicesList)
 
         self.toolBar1.addWidget(self.arduino_combobox)
@@ -228,7 +229,7 @@ class Valvulas(QMainWindow,
         string_data = ''
         list_strings = []
         if str(self.arduino_combobox.currentText()):
-            self.statusBar1.showMessage('Connecting...')
+            self.statusBar1.showMessage(self.tr('Conectando...'))
             for elem_edit in self.lineEdits_list:
                 # delay
                 string_data = string_data + str(((int(elem_edit[0].text()) * 3600) + (int(elem_edit[1].text()) * 60) \
@@ -253,14 +254,14 @@ class Valvulas(QMainWindow,
             self.thread_connection.finished.connect(self.finished_thread)
             self.thread_connection.connection_exit_status.connect(self.finished_thread)
         else:
-            QMessageBox.warning(self, 'Advertencia', "Arduino no seleccionado", QMessageBox.Ok)
+            QMessageBox.warning(self, self.tr('Advertencia'), self.tr("Arduino no seleccionado"), QMessageBox.Ok)
 
     def finished_thread(self, error=None,  message=''):
         if error == 'error':
             QMessageBox.critical(self, 'Error', message, QMessageBox.Ok)
             return
         elif error == 'success':
-            QMessageBox.information(self, u'Éxito', message, QMessageBox.Ok)
+            QMessageBox.information(self, self.tr(u'Éxito'), message, QMessageBox.Ok)
             return
         self.btn_execute.setEnabled(True)
         self.button_stop.setEnabled(True)
@@ -321,7 +322,7 @@ class Valvulas(QMainWindow,
 
     def saveFileAs(self):
         my_home = os.path.expanduser('~')
-        self.filename = QFileDialog.getSaveFileName(self, 'Guardar como', os.path.join(my_home, "archivo.txt"), "", "",
+        self.filename = QFileDialog.getSaveFileName(self, self.tr('Guardar como'), os.path.join(my_home, "archivo.txt"), "", "",
                                                     QFileDialog.DontUseNativeDialog)
         print ("me", self.filename)
         if not self.filename.isNull():
@@ -331,7 +332,7 @@ class Valvulas(QMainWindow,
 
         progressDialog = QProgressDialog()
         progressDialog.setModal(True)
-        progressDialog.setLabelText('Guardando...')
+        progressDialog.setLabelText(self.tr('Guardando...'))
         progressDialog.setMaximum(8)
         progressDialog.setCancelButton(None)
         # self.save_data = SaveDataThread(listx,
@@ -356,9 +357,9 @@ class Valvulas(QMainWindow,
                     file_obj.write(''.join([str(elem_edit[11].text()), '\n']))
                     progressDialog.setValue(count)
         except (IOError, OSError):
-            QMessageBox.critical(self, 'Error', 'Error al guardar.', QMessageBox.Ok)
+            QMessageBox.critical(self, self.tr('Error'), self.tr('Error al guardar.'), QMessageBox.Ok)
         else:
-            self.statusBar1.showMessage('Guardado', 3000)
+            self.statusBar1.showMessage(self.tr('Guardado'), 3000)
 
     def closeEvent(self, QCloseEvent):
         try:
@@ -373,7 +374,7 @@ class Valvulas(QMainWindow,
         # self.save_data.start()
         try:
             my_home = os.path.expanduser('~')
-            file_name = QFileDialog.getOpenFileName(self, 'Abrir archivo', my_home, '*.txt')
+            file_name = QFileDialog.getOpenFileName(self, self.tr('Abrir archivo'), my_home, '*.txt')
             list_values = []
             if not file_name.isNull():
                 with open(file_name) as fp:
@@ -390,9 +391,9 @@ class Valvulas(QMainWindow,
                         count = count + 1
 
         except (IOError, OSError):
-            QMessageBox.critical(self, 'Error', 'No se pudo abrir el archivo.', QMessageBox.Ok)
+            QMessageBox.critical(self, self.tr('Error'), self.tr('No se pudo abrir el archivo.'), QMessageBox.Ok)
         except (IndexError, Uncompatible_Data):
-            QMessageBox.warning(self, 'Advertencia', 'Formato incompatible.', QMessageBox.Ok)
+            QMessageBox.warning(self, self.tr('Advertencia'), self.tr('Formato incompatible.'), QMessageBox.Ok)
 
 class Arduino_Communication(QThread):
     connection_exit_status = Signal(str, str)
@@ -443,17 +444,17 @@ class Arduino_Communication(QThread):
         except (serial.SerialException, Connection_TimeOut_Arduino):
             print "closed err"
             try:
-                #TODO check if this affects
+                # TODO check if this affects
                 # self.serial_connection.write('KO')
                 self.serial_connection.close()
             except AttributeError:
                 print "No such object"
             print "err"
-            self.connection_exit_status.emit('error', u"Error en conexión.")
+            self.connection_exit_status.emit('error', self.tr(u"Error en conexión."))
         except Connection_Killed:
-            self.connection_exit_status.emit('success', 'Valvuas detenidas.')
+            self.connection_exit_status.emit('success', self.tr(u'Válvulas detenidas.'))
         else:
-            self.connection_exit_status.emit('success', u'Conexión exitosa.')
+            self.connection_exit_status.emit('success', self.tr(u'Conexión exitosa.'))
 
 
 

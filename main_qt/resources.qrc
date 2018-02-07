@@ -1,5 +1,10 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-<file alias="reload.png">myImages/box-plot.png</file>
+    <file alias="reload.png">myImages/box-plot.png</file>
+    <file alias="main.png">myImages/main_icon.png</file>
+</qresource>
+<qresource>
+<file>qt_en.qm</file>
+<file>valves_en.qm</file>
 </qresource>
 </RCC>
