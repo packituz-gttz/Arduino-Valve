@@ -415,6 +415,7 @@ class Arduino_Communication(QThread):
                 self.serial_connection.flushOutput()
                 raise Connection_Killed()
             else:
+                self.list_data.insert(0, "KO")
                 print self.list_data
                 for count, elem_string in enumerate(self.list_data, 0):
                     tries = 0
@@ -427,6 +428,7 @@ class Arduino_Communication(QThread):
                         data = self.serial_connection.readline()
                         # self.serial_connection.flushInput()
                         if data:
+                            print ("data", data)
                             if data.replace('\r\n', '') == self.list_data[count]:
                                 print ("receive", data)
                                 self.serial_connection.write('OK')

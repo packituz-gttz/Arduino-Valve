@@ -215,6 +215,7 @@ void loop()
       
     }
     else if (String("KILL") == data) {
+      start = false;
       time_out1 = 0;
       time_out2 = 0;
       time_out3 = 0;
@@ -223,11 +224,10 @@ void loop()
       time_out6 = 0;
       time_out7 = 0;
       time_out8 = 0;
-
       
-      cont_valves = 0;
+      cont_valves = -1;
       timeElapsed = 0;
-      start = false;
+      
       digitalWrite(LEDPIN, LOW);
       digitalWrite(LEDPIN2, LOW);
       digitalWrite(LEDPIN3, LOW);
@@ -237,10 +237,113 @@ void loop()
       digitalWrite(LEDPIN7, LOW);
       digitalWrite(LEDPIN8, LOW);      
       
+      // delay(1);
+      //LEQ
+      // Serial.println(data);
+      
     }
     // Still used
     else if (String("KO") == data) {
-      cont_valves=0;
+      start = false;
+      time_out1 = 0;
+      time_out2 = 0;
+      time_out3 = 0;
+      time_out4 = 0;
+      time_out5 = 0;
+      time_out6 = 0;
+      time_out7 = 0;
+      time_out8 = 0;
+
+delay1 = 0;
+delay2 = 0;
+delay3 = 0;
+delay4 = 0;
+delay5 = 0;
+delay6 = 0;
+delay7 = 0;
+delay8 = 0;
+
+on1 = 0;
+on2 = 0;
+on3 = 0;
+on4 = 0;
+on5 = 0;
+on6 = 0;
+on7 = 0;
+on8 = 0;
+
+time_started1 = 0;
+time_started2 = 0;
+time_started3 = 0;
+time_started4 = 0;
+time_started5 = 0;
+time_started6 = 0;
+time_started7 = 0;
+time_started8 = 0;
+
+off1 = 0;
+off2 = 0;
+off3 = 0;
+off4 = 0;
+off5 = 0;
+off6 = 0;
+off7 = 0;
+off8 = 0;
+
+valve1_delay_passed = false;
+valve2_delay_passed = false;
+valve3_delay_passed = false;
+valve4_delay_passed = false;
+valve5_delay_passed = false;
+valve6_delay_passed = false;
+valve7_delay_passed = false;
+valve8_delay_passed = false;
+
+valve1_on_passed = false;
+valve2_on_passed = false;
+valve3_on_passed = false;
+valve4_on_passed = false;
+valve5_on_passed = false;
+valve6_on_passed = false;
+valve7_on_passed = false;
+valve8_on_passed = false;
+
+valve1_off_passed = false;
+valve2_off_passed = false;
+valve3_off_passed = false;
+valve4_off_passed = false;
+valve5_off_passed = false;
+valve6_off_passed = false;
+valve7_off_passed = false;
+valve8_off_passed = false;
+
+//Time out vars?
+time_out1 = 0;
+time_out2 = 0;
+time_out3 = 0;
+time_out4 = 0;
+time_out5 = 0;
+time_out6 = 0;
+time_out7 = 0;
+time_out8 = 0;
+
+
+
+      
+      cont_valves = -1;
+      timeElapsed = 0;
+      
+      digitalWrite(LEDPIN, LOW);
+      digitalWrite(LEDPIN2, LOW);
+      digitalWrite(LEDPIN3, LOW);
+      digitalWrite(LEDPIN4, LOW);
+      digitalWrite(LEDPIN5, LOW);
+      digitalWrite(LEDPIN6, LOW);
+      digitalWrite(LEDPIN7, LOW);
+      digitalWrite(LEDPIN8, LOW);      
+      
+      delay(1);
+      Serial.println(data);
     }
     else {
       if (cont_valves == 0){
