@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+# TODO Update syntax of connections
 import os
 import serial
 import serial.tools.list_ports
@@ -8,8 +8,11 @@ from PyQt4.QtCore import pyqtSignal as Signal
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QKeySequence, QRegExpValidator, QLabel, QFrame, QIcon, QAction,
                          QComboBox, QMessageBox, QProgressDialog)
 import Valvulas
+import logging
 import resources
 
+logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s => %(message)s')
+logging.debug('Start of program')
 
 class Connection_TimeOut_Arduino(Exception):
     pass
@@ -43,8 +46,8 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
         self.sizeLabel.setFrameStyle(QFrame.StyledPanel | QFrame.Sunken)
         self.statusBar1.addPermanentWidget(self.sizeLabel)
         self.statusBar1.setSizeGripEnabled(False)
-        self.createToolBar()
-        self.updateDevicesList()
+        self.create_tool_bar()
+        self.update_devices_list()
         self.button_stop.clicked.connect(self.stop_all)
         # List of valve pushbuttons
         self.valve_list = [self.valve1, self.valve2, self.valve3, self.valve4,
@@ -109,7 +112,6 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
             (self.valve_list[index - 1]).clicked.connect(self.myMapper.map)
 
             for index2, lineedits in enumerate(editLabels, 0):
-                print index2
                 self.myMapper_StyleSheet.setMapping(self.lineEdits_list[index - 1][index2], index - 1)
                 (self.lineEdits_list[index - 1][index2]).textChanged.connect(self.myMapper_StyleSheet.map)
 
@@ -120,10 +122,8 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
         # self.edit1_delayh.textChanged.connect(self.valve_color_status)
 
     def valve_color_status(self, index):
-        print "me"
-
+        logging.info("Checking color from valve button")
         for edit in self.lineEdits_list[index]:
-            print edit.text()
             if edit.text().contains(self.regex_edits):
                 self.valve_list[index].setStyleSheet('')
             else:
@@ -132,11 +132,11 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
 
     def stop_usb(self):
         try:
-            print self.thread_connection.isRunning()
+            # print self.thread_connection.isRunning()
             if self.thread_connection.isRunning():
                 self.thread_connection.terminate()
         except AttributeError:
-            pass
+            logging.debug("Thread not running \'disconnected! \'")
 
 
     def stop_all(self):
@@ -148,8 +148,7 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
         self.thread_connection.finished.connect(self.finished_thread)
         self.thread_connection.connection_exit_status.connect(self.finished_thread)
 
-    def createToolBar(self):
-
+    def create_tool_bar(self):
         self.label_arduino = QLabel(self.tr('Dispositivos: '))
         self.toolBar1.addWidget(self.label_arduino)
 
@@ -162,12 +161,12 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
         self.reload = QAction(QIcon(":/reload.png"), self.tr("&Refrescar"), self)
         self.reload.setShortcut(QKeySequence.Refresh)
         self.reload.setToolTip(self.tr('Refrescar Dispositivos'))
-        self.reload.triggered.connect(self.updateDevicesList)
+        self.reload.triggered.connect(self.update_devices_list)
 
         self.toolBar1.addWidget(self.arduino_combobox)
         self.toolBar1.addAction(self.reload)
 
-    def updateDevicesList(self):
+    def update_devices_list(self):
         device_list = serial.tools.list_ports.comports()
         current_arduino = self.arduino_combobox.currentText()
         self.arduino_combobox.clear()
@@ -320,12 +319,11 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
         my_home = os.path.expanduser('~')
         self.filename = QFileDialog.getSaveFileName(self, self.tr('Guardar como'), os.path.join(my_home, "archivo.txt"), "", "",
                                                     QFileDialog.DontUseNativeDialog)
-        print ("me", self.filename)
+        logging.info("Filename to save: %s" % self.filename)
         if not self.filename.isNull():
             self.writeDataToFile('w')
 
     def writeDataToFile(self, open_mode):
-
         progressDialog = QProgressDialog()
         progressDialog.setModal(True)
         progressDialog.setLabelText(self.tr('Guardando...'))
@@ -360,9 +358,9 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
     def closeEvent(self, QCloseEvent):
         try:
             self.thread_connection.serial_connection.close()
-            print "Closed"
+            logging.debug("Thread running and killed at closing program")
         except AttributeError:
-            print "Error closing"
+            logging.debug("Thread was not running when closing program OK")
 
     def openFile(self):
         # self.save_data = SaveDataThread(listx,
@@ -370,14 +368,15 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
         # self.save_data.start()
         try:
             my_home = os.path.expanduser('~')
-            file_name = QFileDialog.getOpenFileName(self, self.tr('Abrir archivo'), my_home, '*.txt')
+            file_name = QFileDialog.getOpenFileName(self, self.tr('Abrir archivo'), my_home, '*.txt', '*.txt',
+                                                    QFileDialog.DontUseNativeDialog)
+            logging.warning("file_name type: %s" % type(file_name))
             list_values = []
             if not file_name.isNull():
                 with open(file_name) as fp:
                     for line in fp:
                         list_values.extend([line.replace('\n', '')])
-
-                print list_values
+                logging.info("List Content: %s" % list_values)
                 count = 0
                 for elems in self.lineEdits_list:
                     for inner_elem in elems:
@@ -385,11 +384,11 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
                             raise Uncompatible_Data()
                         inner_elem.setText(list_values[count])
                         count = count + 1
-
         except (IOError, OSError):
             QMessageBox.critical(self, self.tr('Error'), self.tr('No se pudo abrir el archivo.'), QMessageBox.Ok)
         except (IndexError, Uncompatible_Data):
             QMessageBox.warning(self, self.tr('Advertencia'), self.tr('Formato incompatible.'), QMessageBox.Ok)
+
 
 class Arduino_Communication(QThread):
     # Custom Signal, inform GUI about the way the connection ended
@@ -407,7 +406,7 @@ class Arduino_Communication(QThread):
             self.serial_connection = serial.Serial(self.device, 9600, timeout=4, write_timeout=4)
             # If list_data is empty it means we must stop the valves
             if not self.list_data:
-                print "None, kill all valves"
+                logging.info("None, kill all valves")
                 # Sleep to prevent a dead-lock
                 self.sleep(2)
                 self.serial_connection.write("KILL")
@@ -416,13 +415,13 @@ class Arduino_Communication(QThread):
             else:
                 # Send parameters for valves programming, KO cleans all vars on arduino
                 self.list_data.insert(0, "KO")
-                print self.list_data
+                logging.warning("Appended KO to list_data" % self.list_data)
                 for count, elem_string in enumerate(self.list_data, 0):
                     tries = 0
                     self.sleep(2)
-                    print "post sleep"
+                    logging.info("Post Sleep")
                     self.serial_connection.write(self.list_data[count])
-                    print "post write"
+                    logging.info("Post Write")
                     # self.serial_connection.flushOutput()
                     # Check data was sent correctly
                     # if data got corrupted, try to resend 4 times
@@ -430,28 +429,28 @@ class Arduino_Communication(QThread):
                         data = self.serial_connection.readline()
                         # self.serial_connection.flushInput()
                         if data:
-                            print ("data", data)
+                            logging.debug("Data Sent: %s" % data)
                             if data.replace('\r\n', '') == self.list_data[count]:
-                                print ("receive", data)
+                                logging.warning("OK, data returned %s:" % data)
                                 self.serial_connection.write('OK')
                                 # self.serial_connection.flushOutput()
                                 # self.sleep(2)
                                 break
-                        print "err data me"
+                        logging.info("Data malformed, retrying %s" % tries)
                         tries = tries + 1
                     # Close connection if data corruption couldn't be corrected
                     if tries >= 4:
-                        print "retries err"
+                        logging.error("Unable to send data due to corruption")
                         raise Connection_TimeOut_Arduino()
                 # self.serial_connection.write('--DONE--')
         except (serial.SerialException, Connection_TimeOut_Arduino):
-            print "closed err"
+            logging.error("Unable to send data")
             try:
                 # TODO check if this affects
                 # self.serial_connection.write('KO')
                 self.serial_connection.close()
             except AttributeError:
-                print "No such object"
+                logging.info("Closed Serial because of error")
             self.connection_exit_status.emit('error', self.tr(u"Error en conexión."))
         except Connection_Killed:
             self.connection_exit_status.emit('success', self.tr(u'Válvulas detenidas.'))
@@ -465,7 +464,6 @@ class Filter(QObject):
         # FocusOut event
         if event.type() == QEvent.FocusOut:
             # do custom stuff
-            print 'focus out'
             if widget.text() == '':
                 widget.setText('0')
             # return False so that the widget will also handle the event
