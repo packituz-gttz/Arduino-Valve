@@ -33,8 +33,10 @@ class ValvulasMainWindow(QMainWindow,
     def __init__(self, parent=None):
         super(ValvulasMainWindow, self).__init__(parent)
         self.myMapper = QSignalMapper(self)
+        self.myMapper_StyleSheet = QSignalMapper(self)
         self.setupUi(self)
 
+        self.regex_edits = QRegExp(r"(^[0]+$|^$)")
         self._filter = Filter()
         self.filename = QString(u'')
         self.edit1_delayh.installEventFilter(self._filter)
@@ -110,6 +112,9 @@ class ValvulasMainWindow(QMainWindow,
             self.myMapper.setMapping(self.valve_list[index - 1], index)
             (self.valve_list[index - 1]).clicked.connect(self.myMapper.map)
 
+            for index2, lineedits in enumerate(self.lineEdits_list, 0):
+                self.myMapper_StyleSheet.setMapping(self.lineEdits_list[index - 1][index2], index - 1)
+                (self.lineEdits_list[index - 1][index2]).textChanged.connect(self.myMapper_StyleSheet.map)
             # Comment
             # self.myMapper.setMapping(editLabels[0], index)
             # editLabels[0].editingFinished.connect(self.myMapper.map)
@@ -131,8 +136,23 @@ class ValvulasMainWindow(QMainWindow,
             #
             # index = index + 1
         self.myMapper.mapped['int'].connect(self.enable_fields)
+        self.myMapper_StyleSheet.mapped['int'].connect(self.valve_color_status)
         #self.myMapper.mapped['int'].connect(self.print_me)
         self.btn_stop_usb.clicked.connect(self.stop_usb)
+        # self.edit1_delayh.textChanged.connect(self.valve_color_status)
+
+    def valve_color_status(self, index):
+        print "me"
+
+        for edit in self.lineEdits_list[index]:
+            print edit.text()
+            if edit.text().contains(self.regex_edits):
+
+                self.valve_list[index].setStyleSheet('')
+            else:
+                print "ok"
+                self.valve_list[index].setStyleSheet('background-color: rgb(29, 255, 36);')
+                break
 
     def stop_usb(self):
         try:
