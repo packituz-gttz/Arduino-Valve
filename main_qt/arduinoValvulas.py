@@ -28,8 +28,7 @@ class Connection_Killed(Exception):
 
 
 # Main window imported from ui file
-class ValvulasMainWindow(QMainWindow,
-               Valvulas.Ui_ValvulasMainWindow):
+class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
     def __init__(self, parent=None):
         super(ValvulasMainWindow, self).__init__(parent)
         self.myMapper = QSignalMapper(self)
@@ -109,13 +108,14 @@ class ValvulasMainWindow(QMainWindow,
             self.myMapper.setMapping(self.valve_list[index - 1], index)
             (self.valve_list[index - 1]).clicked.connect(self.myMapper.map)
 
-            for index2, lineedits in enumerate(self.lineEdits_list, 0):
+            for index2, lineedits in enumerate(editLabels, 0):
+                print index2
                 self.myMapper_StyleSheet.setMapping(self.lineEdits_list[index - 1][index2], index - 1)
                 (self.lineEdits_list[index - 1][index2]).textChanged.connect(self.myMapper_StyleSheet.map)
 
         self.myMapper.mapped['int'].connect(self.enable_fields)
         self.myMapper_StyleSheet.mapped['int'].connect(self.valve_color_status)
-        #self.myMapper.mapped['int'].connect(self.print_me)
+        # self.myMapper.mapped['int'].connect(self.print_me)
         self.btn_stop_usb.clicked.connect(self.stop_usb)
         # self.edit1_delayh.textChanged.connect(self.valve_color_status)
 
@@ -178,7 +178,7 @@ class ValvulasMainWindow(QMainWindow,
 
     # def calculateTime(self, index):
     #     pass
-        #print index
+        # print index
         # counter = 0
         # hours = 0
         # minutes = 0
@@ -337,7 +337,7 @@ class ValvulasMainWindow(QMainWindow,
         progressDialog.show()
 
         try:
-            with open(self.filename, open_mode) as file_obj:
+            with open(unicode(self.filename), open_mode) as file_obj:
                 for count, elem_edit in enumerate(self.lineEdits_list, 1):
                     file_obj.write(''.join([str(elem_edit[0].text()), '\n']))
                     file_obj.write(''.join([str(elem_edit[1].text()), '\n']))
