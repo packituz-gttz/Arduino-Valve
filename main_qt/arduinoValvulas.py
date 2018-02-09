@@ -40,13 +40,10 @@ class ValvulasMainWindow(QMainWindow,
         self._filter = Filter()
         self.filename = QString(u'')
         self.edit1_delayh.installEventFilter(self._filter)
-        # self.btn_save.setShortcut(QKeySequence.SaveAs)
-        # self.btn_save_2.setShortcut(QKeySequence.Save)
         self.sizeLabel = QLabel()
         self.sizeLabel.setFrameStyle(QFrame.StyledPanel | QFrame.Sunken)
         self.statusBar1.addPermanentWidget(self.sizeLabel)
         self.statusBar1.setSizeGripEnabled(False)
-        # self.checkArduinoState()
         self.createToolBar()
         self.updateDevicesList()
         self.button_stop.clicked.connect(self.stop_all)
@@ -115,26 +112,7 @@ class ValvulasMainWindow(QMainWindow,
             for index2, lineedits in enumerate(self.lineEdits_list, 0):
                 self.myMapper_StyleSheet.setMapping(self.lineEdits_list[index - 1][index2], index - 1)
                 (self.lineEdits_list[index - 1][index2]).textChanged.connect(self.myMapper_StyleSheet.map)
-            # Comment
-            # self.myMapper.setMapping(editLabels[0], index)
-            # editLabels[0].editingFinished.connect(self.myMapper.map)
-            #
-            # self.myMapper.setMapping(editLabels[1], index)
-            # editLabels[1].returnPressed .connect(self.myMapper.map)
-            #
-            # self.myMapper.setMapping(editLabels[2], index)
-            # editLabels[2].returnPressed.connect(self.myMapper.map)
-            #
-            # self.myMapper.setMapping(editLabels[3], index)
-            # editLabels[3].returnPressed.connect(self.myMapper.map)
-            #
-            # self.myMapper.setMapping(editLabels[4], index)
-            # editLabels[4].returnPressed.connect(self.myMapper.map)
-            #
-            # self.myMapper.setMapping(editLabels[5], index)
-            # editLabels[5].returnPressed.connect(self.myMapper.map)
-            #
-            # index = index + 1
+
         self.myMapper.mapped['int'].connect(self.enable_fields)
         self.myMapper_StyleSheet.mapped['int'].connect(self.valve_color_status)
         #self.myMapper.mapped['int'].connect(self.print_me)
@@ -147,10 +125,8 @@ class ValvulasMainWindow(QMainWindow,
         for edit in self.lineEdits_list[index]:
             print edit.text()
             if edit.text().contains(self.regex_edits):
-
                 self.valve_list[index].setStyleSheet('')
             else:
-                print "ok"
                 self.valve_list[index].setStyleSheet('background-color: rgb(29, 255, 36);')
                 break
 
@@ -416,9 +392,10 @@ class ValvulasMainWindow(QMainWindow,
             QMessageBox.warning(self, self.tr('Advertencia'), self.tr('Formato incompatible.'), QMessageBox.Ok)
 
 class Arduino_Communication(QThread):
+    # Custom Signal, inform GUI about the way the connection ended
     connection_exit_status = Signal(str, str)
-    # connection_success = Signal(str, str)
 
+    # Receives Arduino path and line_edits' text as a list
     def __init__(self, device=None, list_data='', parent=None):
         super(Arduino_Communication, self).__init__(parent)
         self.device = device
@@ -428,13 +405,16 @@ class Arduino_Communication(QThread):
     def run(self):
         try:
             self.serial_connection = serial.Serial(self.device, 9600, timeout=4, write_timeout=4)
+            # If list_data is empty it means we must stop the valves
             if not self.list_data:
                 print "None, kill all valves"
+                # Sleep to prevent a dead-lock
                 self.sleep(2)
                 self.serial_connection.write("KILL")
                 self.serial_connection.flushOutput()
                 raise Connection_Killed()
             else:
+                # Send parameters for valves programming, KO cleans all vars on arduino
                 self.list_data.insert(0, "KO")
                 print self.list_data
                 for count, elem_string in enumerate(self.list_data, 0):
@@ -444,6 +424,8 @@ class Arduino_Communication(QThread):
                     self.serial_connection.write(self.list_data[count])
                     print "post write"
                     # self.serial_connection.flushOutput()
+                    # Check data was sent correctly
+                    # if data got corrupted, try to resend 4 times
                     while tries < 4:
                         data = self.serial_connection.readline()
                         # self.serial_connection.flushInput()
@@ -457,12 +439,11 @@ class Arduino_Communication(QThread):
                                 break
                         print "err data me"
                         tries = tries + 1
-
+                    # Close connection if data corruption couldn't be corrected
                     if tries >= 4:
                         print "retries err"
                         raise Connection_TimeOut_Arduino()
                 # self.serial_connection.write('--DONE--')
-        # TODO Check if KO is still used
         except (serial.SerialException, Connection_TimeOut_Arduino):
             print "closed err"
             try:
@@ -471,7 +452,6 @@ class Arduino_Communication(QThread):
                 self.serial_connection.close()
             except AttributeError:
                 print "No such object"
-            print "err"
             self.connection_exit_status.emit('error', self.tr(u"Error en conexión."))
         except Connection_Killed:
             self.connection_exit_status.emit('success', self.tr(u'Válvulas detenidas.'))
@@ -479,9 +459,7 @@ class Arduino_Communication(QThread):
             self.connection_exit_status.emit('success', self.tr(u'Conexión exitosa.'))
 
 
-
-
-
+# Filter for catching focus out event
 class Filter(QObject):
     def eventFilter(self, widget, event):
         # FocusOut event
