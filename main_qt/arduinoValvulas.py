@@ -95,25 +95,15 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
 
         # index = 1
         for index, editLabels in enumerate(self.lineEdits_list, 1):
-            editLabels[0].installEventFilter(self._filter)
-            editLabels[1].installEventFilter(self._filter)
-            editLabels[2].installEventFilter(self._filter)
-            editLabels[3].installEventFilter(self._filter)
-            editLabels[4].installEventFilter(self._filter)
-            editLabels[5].installEventFilter(self._filter)
-            editLabels[6].installEventFilter(self._filter)
-            editLabels[7].installEventFilter(self._filter)
-            editLabels[8].installEventFilter(self._filter)
-            editLabels[9].installEventFilter(self._filter)
-            editLabels[10].installEventFilter(self._filter)
-            editLabels[11].installEventFilter(self._filter)
-
-            self.myMapper.setMapping(self.valve_list[index - 1], index)
-            (self.valve_list[index - 1]).clicked.connect(self.myMapper.map)
 
             for index2, lineedits in enumerate(editLabels, 0):
                 self.myMapper_StyleSheet.setMapping(self.lineEdits_list[index - 1][index2], index - 1)
                 (self.lineEdits_list[index - 1][index2]).textChanged.connect(self.myMapper_StyleSheet.map)
+                self.lineEdits_list[index - 1][index2].installEventFilter(self._filter)
+
+
+            self.myMapper.setMapping(self.valve_list[index - 1], index)
+            (self.valve_list[index - 1]).clicked.connect(self.myMapper.map)
 
         self.myMapper.mapped['int'].connect(self.enable_fields)
         self.myMapper_StyleSheet.mapped['int'].connect(self.valve_color_status)
@@ -132,7 +122,6 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
 
     def stop_usb(self):
         try:
-            # print self.thread_connection.isRunning()
             if self.thread_connection.isRunning():
                 self.thread_connection.terminate()
         except AttributeError:
@@ -227,16 +216,16 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
             self.statusBar1.showMessage(self.tr('Conectando...'))
             for elem_edit in self.lineEdits_list:
                 # delay
-                string_data = string_data + str(((int(elem_edit[0].text()) * 3600) + (int(elem_edit[1].text()) * 60) \
-                + (int(elem_edit[2].text()))) * 1000) + ';'
+                string_data = string_data + str(((int(elem_edit[0].text()) * 3600) + (int(elem_edit[1].text()) * 60)
+                                                 + (int(elem_edit[2].text()))) * 1000) + ';'
                 # ON
-                string_data = string_data + str(((int(elem_edit[3].text()) * 3600) + (int(elem_edit[4].text()) * 60) \
+                string_data = string_data + str(((int(elem_edit[3].text()) * 3600) + (int(elem_edit[4].text()) * 60)
                                                  + (int(elem_edit[5].text()))) * 1000) + ';'
                 # OFF
-                string_data = string_data + str(((int(elem_edit[6].text()) * 3600) + (int(elem_edit[7].text()) * 60) \
+                string_data = string_data + str(((int(elem_edit[6].text()) * 3600) + (int(elem_edit[7].text()) * 60)
                                                  + (int(elem_edit[8].text()))) * 1000) + ';'
                 # Total
-                string_data = string_data + str(((int(elem_edit[9].text()) * 3600) + (int(elem_edit[10].text()) * 60) \
+                string_data = string_data + str(((int(elem_edit[9].text()) * 3600) + (int(elem_edit[10].text()) * 60)
                                                  + (int(elem_edit[11].text()))) * 1000) + ';'
 
                 list_strings.append(string_data)
@@ -395,7 +384,7 @@ class Arduino_Communication(QThread):
     connection_exit_status = Signal(str, str)
 
     # Receives Arduino path and line_edits' text as a list
-    def __init__(self, device=None, list_data='', parent=None):
+    def __init__(self, device=None, list_data=None, parent=None):
         super(Arduino_Communication, self).__init__(parent)
         self.device = device
         self.list_data = list_data
@@ -410,7 +399,7 @@ class Arduino_Communication(QThread):
                 # Sleep to prevent a dead-lock
                 self.sleep(2)
                 self.serial_connection.write("KILL")
-                self.serial_connection.flushOutput()
+                # self.serial_connection.flushOutput()
                 raise Connection_Killed()
             else:
                 # Send parameters for valves programming, KO cleans all vars on arduino
