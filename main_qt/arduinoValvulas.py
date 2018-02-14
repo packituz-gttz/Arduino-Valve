@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# TODO Update syntax of connections
 import os
 import serial
 import serial.tools.list_ports
