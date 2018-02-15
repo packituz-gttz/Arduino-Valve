@@ -31,6 +31,8 @@ class Connection_Killed(Exception):
 
 # Main window imported from ui file
 class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
+    closedInform = Signal()
+
     def __init__(self, parent=None):
         super(ValvulasMainWindow, self).__init__(parent)
         self.myMapper = QSignalMapper(self)
@@ -116,7 +118,8 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
             if edit.text().contains(self.regex_edits):
                 self.valve_list[index].setStyleSheet('')
             else:
-                self.valve_list[index].setStyleSheet('background-color: rgb(29, 255, 36);')
+                # self.valve_list[index].setStyleSheet('background-color: rgb(29, 255, 36);')
+                self.valve_list[index].setStyleSheet('background-color: rgb(180, 255, 147);')
                 break
 
     def stop_usb(self):
@@ -345,6 +348,7 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
 
     def closeEvent(self, QCloseEvent):
         try:
+            self.closedInform.emit()
             self.thread_connection.serial_connection.close()
             logging.debug("Thread running and killed at closing program")
         except AttributeError:

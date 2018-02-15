@@ -2,9 +2,10 @@
 <qresource>
     <file alias="reload.png">myImages/box-plot.png</file>
     <file alias="main.png">myImages/main_icon.png</file>
+    <file alias="cover.png">myImages/cover.png</file>
 </qresource>
-<qresource>
-<file>qt_en.qm</file>
-<file>valves_en.qm</file>
-</qresource>
+<!--<qresource>-->
+<!--<file>qt_en.qm</file>-->
+<!--<file>valves_en.qm</file>-->
+<!--</qresource>-->
 </RCC>

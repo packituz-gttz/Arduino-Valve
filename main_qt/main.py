@@ -1,14 +1,13 @@
 # import sys
 from PyQt4.QtGui import QApplication, QIcon, QLabel, QPixmap, QSplashScreen
 from PyQt4.QtCore import Qt
-# import time
-
+import resources
 
 def main():
 
-    app = QApplication(['Arduino Valvulas'])
+    app = QApplication(['Val 508'])
 
-    splash_pixmap = QPixmap('frames.jpg')
+    splash_pixmap = QPixmap(':/cover.png')
     splash_screen = QSplashScreen(splash_pixmap, Qt.WindowStaysOnTopHint)
     # splash = QLabel("<font color=red>CARGANDO...</font>")
     # splash.setWindowFlags(Qt.SplashScreen)
@@ -26,25 +25,25 @@ def main():
 
     app.processEvents()
     # LOAD, QApplication
-    import arduinoValvulas
-    import resources
+#    import arduinoValvulas
+    import mainWindow
     import time
     app.processEvents()
     app.setOrganizationName('Gatituz PK')
     app.setOrganizationDomain('http://gatituzmes-server.duckdns.org/')
     app.processEvents()
-    window = arduinoValvulas.ValvulasMainWindow()
+    window = mainWindow.MainWindowStart()
     app.setWindowIcon(QIcon(":/main.png"))
     app.processEvents()
 
     app.processEvents()
     # TODO Check loading speed
-    time.sleep(1)
+    time.sleep(2)
     app.processEvents()
     time.sleep(1)
     app.processEvents()
     time.sleep(1)
-    window.show()
+    window.showMaximized()
     splash_screen.close()
     # Exec app
     app.exec_()
