@@ -1,7 +1,6 @@
-from PyQt4.QtGui import QApplication, QIcon, QMainWindow
-from PyQt4.QtCore import Qt
-import arduinoValvulas
+from PyQt4.QtGui import QMainWindow
 import MainWindow
+import arduinoValvulas
 
 
 class MainWindowStart(QMainWindow, MainWindow.Ui_MainWindow):
@@ -11,6 +10,7 @@ class MainWindowStart(QMainWindow, MainWindow.Ui_MainWindow):
         self.geometry = None
         self.state = None
         self.btn_yes.clicked.connect(self.start_valve_window)
+        self.btn_no.clicked.connect(self.close)
 
     def start_valve_window(self):
         arduino_valves = arduinoValvulas.ValvulasMainWindow(self)
