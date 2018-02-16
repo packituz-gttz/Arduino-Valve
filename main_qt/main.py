@@ -25,7 +25,6 @@ def main():
 
     app.processEvents()
     # LOAD, QApplication
-#    import arduinoValvulas
     import mainWindow
     import time
     app.processEvents()
