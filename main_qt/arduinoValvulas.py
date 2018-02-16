@@ -5,7 +5,7 @@ import serial.tools.list_ports
 from PyQt4.QtCore import (Qt, pyqtSignature, QSignalMapper, QRegExp, QThread, QEvent, QObject, QString)
 from PyQt4.QtCore import pyqtSignal as Signal
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QKeySequence, QRegExpValidator, QLabel, QFrame, QIcon, QAction,
-                         QComboBox, QMessageBox, QProgressDialog)
+                         QComboBox, QMessageBox, QProgressDialog, QPixmap)
 import Valvulas
 import logging
 import resources
@@ -123,21 +123,40 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
                 break
 
     def stop_usb(self):
-        try:
-            if self.thread_connection.isRunning():
-                self.thread_connection.terminate()
-        except AttributeError:
-            logging.debug("Thread not running \'disconnected! \'")
+        if str(self.arduino_combobox.currentText()):
+            try:
+                self.statusBar1.showMessage(self.tr(u'Conexión detenida'))
+                if self.thread_connection.isRunning():
+                    self.thread_connection.terminate()
+            except AttributeError:
+                logging.debug("Thread not running \'disconnected! \'")
+        else:
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr('Advertencia'))
+            messageBox.setText(self.tr("Arduino no seleccionado"))
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/usb_error.png'))
+            messageBox.exec_()
 
 
     def stop_all(self):
-        self.thread_connection = Arduino_Communication(str(self.arduino_combobox.currentText()))
-        self.thread_connection.start()
-        self.btn_execute.setEnabled(False)
-        self.button_stop.setEnabled(False)
-        self.btn_stop_usb.setEnabled(False)
-        self.thread_connection.finished.connect(self.finished_thread)
-        self.thread_connection.connection_exit_status.connect(self.finished_thread)
+        if str(self.arduino_combobox.currentText()):
+            self.thread_connection = Arduino_Communication(str(self.arduino_combobox.currentText()))
+            self.thread_connection.start()
+            self.btn_execute.setEnabled(False)
+            self.button_stop.setEnabled(False)
+            self.btn_stop_usb.setEnabled(False)
+            self.thread_connection.finished.connect(self.finished_thread)
+            self.thread_connection.connection_exit_status.connect(self.finished_thread)
+        else:
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr('Advertencia'))
+            messageBox.setText(self.tr("Arduino no seleccionado"))
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/usb_error.png'))
+            messageBox.exec_()
 
     def create_tool_bar(self):
         self.label_arduino = QLabel(self.tr('Dispositivos: '))
@@ -240,19 +259,49 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
             self.thread_connection.finished.connect(self.finished_thread)
             self.thread_connection.connection_exit_status.connect(self.finished_thread)
         else:
-            QMessageBox.warning(self, self.tr('Advertencia'), self.tr("Arduino no seleccionado"), QMessageBox.Ok)
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr('Advertencia'))
+            messageBox.setText(self.tr("Arduino no seleccionado"))
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/usb_error.png'))
+            messageBox.exec_()
+            # QMessageBox.warning(self, self.tr('Advertencia'), self.tr("Arduino no seleccionado"), QMessageBox.Ok)
 
     def finished_thread(self, error=None,  message=''):
         if error == 'error':
-            QMessageBox.critical(self, 'Error', message, QMessageBox.Ok)
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr('Error'))
+            messageBox.setText(message)
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/usb_error.png'))
+            messageBox.exec_()
+            # QMessageBox.critical(self, 'Error', message, QMessageBox.Ok)
             return
         elif error == 'success':
-            QMessageBox.information(self, self.tr(u'Éxito'), message, QMessageBox.Ok)
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr(u'Éxito'))
+            messageBox.setText(message)
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/usb_success.png'))
+            messageBox.exec_()
+            # QMessageBox.information(self, self.tr(u'Éxito'), message, QMessageBox.Ok)
+            return
+        elif error == 'stopped':
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr(u'Éxito'))
+            messageBox.setText(message)
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/success_general.png'))
+            messageBox.exec_()
             return
         self.btn_execute.setEnabled(True)
         self.button_stop.setEnabled(True)
         self.btn_stop_usb.setEnabled(True)
-        self.statusBar1.clear()
+        self.statusBar1.showMessage(self.tr('Finalizado'))
 
     @pyqtSignature("")
     def on_btn_open_clicked(self):
@@ -342,7 +391,16 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
                     file_obj.write(''.join([str(elem_edit[11].text()), '\n']))
                     progressDialog.setValue(count)
         except (IOError, OSError):
-            QMessageBox.critical(self, self.tr('Error'), self.tr('Error al guardar.'), QMessageBox.Ok)
+            progressDialog.close()
+            # QMessageBox.critical(self, self.tr('Error'), self.tr('Error al guardar.'), QMessageBox.Ok)
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr('Error'))
+            messageBox.setText(self.tr('Error al guardar'))
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIcon(QMessageBox.Critical)
+            messageBox.exec_()
+
         else:
             self.statusBar1.showMessage(self.tr('Guardado'), 3000)
 
@@ -377,9 +435,23 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
                         inner_elem.setText(list_values[count])
                         count = count + 1
         except (IOError, OSError):
-            QMessageBox.critical(self, self.tr('Error'), self.tr('No se pudo abrir el archivo.'), QMessageBox.Ok)
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr('Error'))
+            messageBox.setText(self.tr('No se pudo abrir el archivo'))
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/broken_file.png'))
+            messageBox.exec_()
+            # QMessageBox.critical(self, self.tr('Error'), self.tr('No se pudo abrir el archivo.'), QMessageBox.Ok)
         except (IndexError, Uncompatible_Data):
-            QMessageBox.warning(self, self.tr('Advertencia'), self.tr('Formato incompatible.'), QMessageBox.Ok)
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr('Error'))
+            messageBox.setText(self.tr('Formato Incompatible'))
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/broken_file.png'))
+            messageBox.exec_()
+            # QMessageBox.warning(self, self.tr('Advertencia'), self.tr('Formato incompatible.'), QMessageBox.Ok)
 
 
 class Arduino_Communication(QThread):
@@ -443,9 +515,10 @@ class Arduino_Communication(QThread):
                 self.serial_connection.close()
             except AttributeError:
                 logging.info("Closed Serial because of error")
-            self.connection_exit_status.emit('error', self.tr(u"Error en conexión."))
+            finally:
+                self.connection_exit_status.emit('error', self.tr(u"Error en conexión."))
         except Connection_Killed:
-            self.connection_exit_status.emit('success', self.tr(u'Válvulas detenidas.'))
+            self.connection_exit_status.emit('stopped', self.tr(u'Válvulas detenidas.'))
         else:
             self.connection_exit_status.emit('success', self.tr(u'Conexión exitosa.'))
 

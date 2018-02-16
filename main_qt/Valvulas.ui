@@ -23,7 +23,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>ValvulasMainWindow</string>
+   <string>VAL 508</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">

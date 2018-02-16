@@ -11,6 +11,9 @@ class MainWindowStart(QMainWindow, MainWindow.Ui_MainWindow):
         self.state = None
         self.btn_yes.clicked.connect(self.start_valve_window)
         self.btn_no.clicked.connect(self.close)
+        self.btn_yes.setFocus()
+        self.btn_yes.setAutoDefault(True)
+        self.btn_no.setAutoDefault(True)
 
     def start_valve_window(self):
         arduino_valves = arduinoValvulas.ValvulasMainWindow(self)

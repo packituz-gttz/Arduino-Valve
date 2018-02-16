@@ -701,7 +701,7 @@ class Ui_ValvulasMainWindow(object):
         ValvulasMainWindow.setTabOrder(self.btn_save, self.btn_open)
 
     def retranslateUi(self, ValvulasMainWindow):
-        ValvulasMainWindow.setWindowTitle(_translate("ValvulasMainWindow", "ValvulasMainWindow", None))
+        ValvulasMainWindow.setWindowTitle(_translate("ValvulasMainWindow", "VAL 508", None))
         self.valve1.setText(_translate("ValvulasMainWindow", "&1", None))
         self.valve2.setText(_translate("ValvulasMainWindow", "&2", None))
         self.valve3.setText(_translate("ValvulasMainWindow", "&3", None))
