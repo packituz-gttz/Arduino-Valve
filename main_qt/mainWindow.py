@@ -15,6 +15,9 @@ class MainWindowStart(QMainWindow, MainWindow.Ui_MainWindow):
         self.btn_yes.setAutoDefault(True)
         self.btn_no.setAutoDefault(True)
 
+        # TODO check previous code
+        self.filename = None
+
     def start_valve_window(self):
         arduino_valves = arduinoValvulas.ValvulasMainWindow(self)
         # arduino_valves.setWindowFlags(Qt.WindowStaysOnTopHint)

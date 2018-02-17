@@ -34,7 +34,7 @@ def main():
     app.processEvents()
     # window = mainWindow.MainWindowStart()
     window = Valves_Main.MainWindowStart()
-    app.setWindowIcon(QIcon(":/main.png"))
+    app.setWindowIcon(QIcon(":/logo.png"))
     app.processEvents()
 
     app.processEvents()

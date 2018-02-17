@@ -1,5 +1,6 @@
 <RCC>
   <qresource>
+    <file alias="logo.png">myImages/logomini2.png</file>
     <file alias="preferences.png">myImages/preferences.png</file>
     <file alias="close_usb.png">myImages/close_usb.png</file>
     <file alias="stop.png">myImages/stop.png</file>

@@ -170,10 +170,12 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
         logging.info("Checking color from valve button")
         for edit in self.lineEdits_list[index]:
             if edit.text().contains(self.regex_edits):
-                self.group_boxes[index].setStyleSheet('')
+                self.group_boxes[index].setStyleSheet('''QGroupBox {
+                                                      border: 2px solid;
+                                                      border-color: rgba(255, 255, 255, 0);}''')
             else:
                 # self.valve_list[index].setStyleSheet('background-color: rgb(29, 255, 36);')
-                self.group_boxes[index].setStyleSheet('''QGroupBox {background-color: rgba(103, 255, 126, 100);
+                self.group_boxes[index].setStyleSheet('''QGroupBox {background-color: rgba(103, 255, 126, 150);
                                                       border: 2px solid;
                                                       border-color: rgba(255, 255, 255, 255);}''')
                 break
