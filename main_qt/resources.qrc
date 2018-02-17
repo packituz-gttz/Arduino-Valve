@@ -1,5 +1,14 @@
-<!DOCTYPE RCC><RCC version="1.0">
-<qresource>
+<RCC>
+  <qresource>
+    <file alias="preferences.png">myImages/preferences.png</file>
+    <file alias="close_usb.png">myImages/close_usb.png</file>
+    <file alias="stop.png">myImages/stop.png</file>
+    <file alias="save_as.png">myImages/save_as.png</file>
+    <file alias="play.png">myImages/play.png</file>
+    <file alias="exit.png">myImages/exit.png</file>
+    <file alias="clear.png">myImages/clear.png</file>
+    <file alias="save.png">myImages/save.png</file>
+    <file alias="help.png">myImages/help.png</file>
     <file alias="reload.png">myImages/refresh_devices.png</file>
     <file alias="main.png">myImages/main_icon.png</file>
     <file alias="cover.png">myImages/cover.png</file>
@@ -7,9 +16,8 @@
     <file alias="usb_success.png">myImages/usb_success.png</file>
     <file alias="success_general.png">myImages/success_general.png</file>
     <file alias="broken_file.png">myImages/broken_file.png</file>
-</qresource>
-<!--<qresource>-->
-<!--<file>qt_en.qm</file>-->
-<!--<file>valves_en.qm</file>-->
-<!--</qresource>-->
+    <file alias="new_file.png">myImages/new_file.png</file>
+    <file alias="open.png">myImages/open.png</file>
+    <file alias="about.png">myImages/about.png</file>
+  </qresource>
 </RCC>
