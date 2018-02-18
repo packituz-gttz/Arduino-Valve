@@ -39,7 +39,7 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
 
         self.regex_edits = QRegExp(r"(^[0]+$|^$)")
         self._filter = Filter()
-        self.filename = QString(u'')
+        self.filename = QString()
         self.edit1_delayh.installEventFilter(self._filter)
         self.sizeLabel = QLabel()
         self.sizeLabel.setFrameStyle(QFrame.StyledPanel | QFrame.Sunken)
@@ -47,6 +47,7 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
         self.statusBar1.setSizeGripEnabled(False)
 
         self.create_connections()
+        self.assign_shortcuts()
 
         self.create_tool_bar()
         self.update_devices_list()
@@ -115,17 +116,41 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
 #        self.btn_stop_usb.clicked.connect(self.stop_usb)
         # self.edit1_delayh.textChanged.connect(self.valve_color_status)
 
+    def assign_shortcuts(self):
+        self.actionArchivo_Nuevo.setShortcut(QKeySequence.New)
+        self.action_Abrir.setShortcut(QKeySequence.Open)
+        self.action_Guardar.setShortcut(QKeySequence.Save)
+        self.actionGuardar_Como.setShortcut(QKeySequence.SaveAs)
+        self.action_Limpiar.setShortcut('Ctrl+L')
+        self.actionVAL_508_Ayuda.setShortcut(QKeySequence.HelpContents)
+        self.action_Salir.setShortcut(QKeySequence.Close)
+        # self.actionPreferencias.setShortcut(QKeySequence.Preferences)
+
+        self.action_Detener_USB.setShortcut('Ctrl+Shift+C')
+        self.action_Ejecutar.setShortcut('Ctrl+Shift+X')
+        self.action_Para_Valvulas.setShortcut('Ctrl+Shift+P')
+
+
     def create_connections(self):
+        self.actionArchivo_Nuevo.triggered.connect(self.new_file)
         self.action_Abrir.triggered.connect(self.open_file)
         self.action_Guardar.triggered.connect(self.save_file)
         self.actionGuardar_Como.triggered.connect(self.save_file_as)
         self.action_Limpiar.triggered.connect(self.clean_fields)
         self.action_Salir.triggered.connect(self.close)
+        self.actionPreferencias.triggered.connect(self.settings)
 
         self.action_Detener_USB.triggered.connect(self.stop_usb)
         self.action_Ejecutar.triggered.connect(self.execute)
         self.action_Para_Valvulas.triggered.connect(self.stop_all)
 
+    # TODO Implement
+    def settings(self):
+        print "me"
+
+    def new_file(self):
+        self.filename = QString()
+        self.clean_fields()
 
     def closeEvent(self, QCloseEvent):
         try:
@@ -143,16 +168,76 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
                 self.lineEdits_list[index - 1][index2].setText('0')
 
     def save_file_as(self):
-        pass
+        my_home = os.path.expanduser('~')
+        self.filename = QFileDialog.getSaveFileName(self, self.tr('Guardar como'), os.path.join(my_home, "archivo.txt"), "", "",
+                                                    QFileDialog.DontUseNativeDialog)
+        logging.info("Filename to save: %s" % self.filename)
+        if not self.filename.isNull():
+            self.write_data_to_file('w')
 
     def save_file(self):
-        pass
+        if self.filename.isNull():
+            self.save_file_as()
+        else:
+            self.write_data_to_file('w')
 
     def execute(self):
-        pass
+        string_data = ''
+        list_strings = []
+        if str(self.arduino_combobox.currentText()):
+            self.statusBar1.showMessage(self.tr('Conectando...'))
+            for elem_edit in self.lineEdits_list:
+                # delay
+                string_data = string_data + str(((int(elem_edit[0].text()) * 3600) + (int(elem_edit[1].text()) * 60)
+                                                 + (int(elem_edit[2].text()))) * 1000) + ';'
+                # ON
+                string_data = string_data + str(((int(elem_edit[3].text()) * 3600) + (int(elem_edit[4].text()) * 60)
+                                                 + (int(elem_edit[5].text()))) * 1000) + ';'
+                # OFF
+                string_data = string_data + str(((int(elem_edit[6].text()) * 3600) + (int(elem_edit[7].text()) * 60)
+                                                 + (int(elem_edit[8].text()))) * 1000) + ';'
+                # Total
+                string_data = string_data + str(((int(elem_edit[9].text()) * 3600) + (int(elem_edit[10].text()) * 60)
+                                                 + (int(elem_edit[11].text()))) * 1000) + ';'
+
+                list_strings.append(string_data)
+                string_data = ''
+
+            self.thread_connection = Arduino_Communication(str(self.arduino_combobox.currentText()), list_strings)
+            self.thread_connection.start()
+            self.action_Ejecutar.setEnabled(False)
+            self.action_Para_Valvulas.setEnabled(False)
+
+            # self.btn_execute.setEnabled(False)
+            # self.button_stop.setEnabled(False)
+            self.thread_connection.finished.connect(self.finished_thread)
+            self.thread_connection.connection_exit_status.connect(self.finished_thread)
+        else:
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr('Advertencia'))
+            messageBox.setText(self.tr("Arduino no seleccionado"))
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/usb_error.png'))
+            messageBox.exec_()
+            # QMessageBox.warning(self, self.tr('Advertencia'), self.tr("Arduino no seleccionado"), QMessageBox.Ok)
 
     def stop_usb(self):
-        pass
+        if str(self.arduino_combobox.currentText()):
+            try:
+                self.statusBar1.showMessage(self.tr(u'Conexión detenida'))
+                if self.thread_connection.isRunning():
+                    self.thread_connection.terminate()
+            except AttributeError:
+                logging.debug("Thread not running \'disconnected! \'")
+        else:
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr('Advertencia'))
+            messageBox.setText(self.tr("Arduino no seleccionado"))
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/usb_error.png'))
+            messageBox.exec_()
 
     def enable_fields(self, index):
         # hours_reg = QRegExp(r"([0-9])|([0-9][0-9][0-9])")
@@ -181,16 +266,238 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
                 break
 
     def create_tool_bar(self):
-        pass
+        self.label_arduino = QLabel(self.tr('Dispositivos: '))
+        self.toolBar.addWidget(self.label_arduino)
+
+        self.arduino_combobox = QComboBox()
+        self.arduino_combobox.setToolTip(self.tr('Seleccionar Arduino'))
+        self.arduino_combobox.setFocusPolicy(Qt.NoFocus)
+        # self.arduino_combobox.activated.connect(self.updateChoosenArduino)
+
+        # Update List of Arduino devices
+        self.reload = QAction(QIcon(":/reload.png"), self.tr("&Refrescar"), self)
+        self.reload.setShortcut(QKeySequence.Refresh)
+        self.reload.setToolTip(self.tr('Refrescar Dispositivos'))
+        self.reload.triggered.connect(self.update_devices_list)
+
+        self.toolBar.addWidget(self.arduino_combobox)
+        self.toolBar.addAction(self.reload)
 
     def update_devices_list(self):
-        pass
+        device_list = serial.tools.list_ports.comports()
+        current_arduino = self.arduino_combobox.currentText()
+        self.arduino_combobox.clear()
+        for device_index, device in enumerate(sorted(device_list)):
+            self.arduino_combobox.addItem(device.device)
+            if device.device == current_arduino:
+                self.arduino_combobox.setCurrentIndex(device_index)
 
     def stop_all(self):
-        pass
+        if str(self.arduino_combobox.currentText()):
+            self.thread_connection = Arduino_Communication(str(self.arduino_combobox.currentText()))
+            self.thread_connection.start()
+            self.action_Ejecutar.setEnabled(False)
+            self.action_Para_Valvulas.setEnabled(False)
+            self.action_Detener_USB.setEnabled(False)
+            # self.btn_execute.setEnabled(False)
+            # self.button_stop.setEnabled(False)
+            # self.btn_stop_usb.setEnabled(False)
+            self.thread_connection.finished.connect(self.finished_thread)
+            self.thread_connection.connection_exit_status.connect(self.finished_thread)
+        else:
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr('Advertencia'))
+            messageBox.setText(self.tr("Arduino no seleccionado"))
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/usb_error.png'))
+            messageBox.exec_()
 
     def open_file(self):
-        pass
+        try:
+            my_home = os.path.expanduser('~')
+            file_name = QFileDialog.getOpenFileName(self, self.tr('Abrir archivo'), my_home, '*.txt', '*.txt',
+                                                    QFileDialog.DontUseNativeDialog)
+            logging.warning("file_name type: %s" % type(file_name))
+            list_values = []
+            if not file_name.isNull():
+                with open(file_name) as fp:
+                    for line in fp:
+                        list_values.extend([line.replace('\n', '')])
+                logging.info("List Content: %s" % list_values)
+                count = 0
+                for elems in self.lineEdits_list:
+                    for inner_elem in elems:
+                        if not unicode(list_values[count]).isdigit():
+                            raise Uncompatible_Data()
+                        inner_elem.setText(list_values[count])
+                        count = count + 1
+        except (IOError, OSError):
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr('Error'))
+            messageBox.setText(self.tr('No se pudo abrir el archivo'))
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/broken_file.png'))
+            messageBox.exec_()
+            # QMessageBox.critical(self, self.tr('Error'), self.tr('No se pudo abrir el archivo.'), QMessageBox.Ok)
+        except (IndexError, Uncompatible_Data):
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr('Error'))
+            messageBox.setText(self.tr('Formato Incompatible'))
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/broken_file.png'))
+            messageBox.exec_()
+
+    def finished_thread(self, error=None,  message=''):
+        if error == 'error':
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr('Error'))
+            messageBox.setText(message)
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/usb_error.png'))
+            messageBox.exec_()
+            # QMessageBox.critical(self, 'Error', message, QMessageBox.Ok)
+            return
+        elif error == 'success':
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr(u'Éxito'))
+            messageBox.setText(message)
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/usb_success.png'))
+            messageBox.exec_()
+            # QMessageBox.information(self, self.tr(u'Éxito'), message, QMessageBox.Ok)
+            return
+        elif error == 'stopped':
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr(u'Éxito'))
+            messageBox.setText(message)
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIconPixmap(QPixmap(':/success_general.png'))
+            messageBox.exec_()
+            return
+        self.action_Ejecutar.setEnabled(True)
+        self.action_Para_Valvulas.setEnabled(True)
+        self.action_Detener_USB.setEnabled(True)
+        # self.btn_execute.setEnabled(True)
+        # self.button_stop.setEnabled(True)
+        # self.btn_stop_usb.setEnabled(True)
+        self.statusBar1.showMessage(self.tr('Finalizado'))
+
+    def write_data_to_file(self, open_mode):
+        progressDialog = QProgressDialog()
+        progressDialog.setModal(True)
+        progressDialog.setLabelText(self.tr('Guardando...'))
+        progressDialog.setMaximum(8)
+        progressDialog.setCancelButton(None)
+        # self.save_data = SaveDataThread(listx,
+        #                                                   listy, self.plot_settings['separator'], self.filename, self)
+        # self.save_data.start()
+        progressDialog.show()
+
+        try:
+            with open(unicode(self.filename), open_mode) as file_obj:
+                for count, elem_edit in enumerate(self.lineEdits_list, 1):
+                    file_obj.write(''.join([str(elem_edit[0].text()), '\n']))
+                    file_obj.write(''.join([str(elem_edit[1].text()), '\n']))
+                    file_obj.write(''.join([str(elem_edit[2].text()), '\n']))
+                    file_obj.write(''.join([str(elem_edit[3].text()), '\n']))
+                    file_obj.write(''.join([str(elem_edit[4].text()), '\n']))
+                    file_obj.write(''.join([str(elem_edit[5].text()), '\n']))
+                    file_obj.write(''.join([str(elem_edit[6].text()), '\n']))
+                    file_obj.write(''.join([str(elem_edit[7].text()), '\n']))
+                    file_obj.write(''.join([str(elem_edit[8].text()), '\n']))
+                    file_obj.write(''.join([str(elem_edit[9].text()), '\n']))
+                    file_obj.write(''.join([str(elem_edit[10].text()), '\n']))
+                    file_obj.write(''.join([str(elem_edit[11].text()), '\n']))
+                    progressDialog.setValue(count)
+        except (IOError, OSError):
+            progressDialog.close()
+            # QMessageBox.critical(self, self.tr('Error'), self.tr('Error al guardar.'), QMessageBox.Ok)
+            messageBox = QMessageBox(self)
+            messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+            messageBox.setWindowTitle(self.tr('Error'))
+            messageBox.setText(self.tr('Error al guardar'))
+            messageBox.setStandardButtons(QMessageBox.Ok)
+            messageBox.setIcon(QMessageBox.Critical)
+            messageBox.exec_()
+
+        else:
+            self.statusBar1.showMessage(self.tr('Guardado'), 3000)
+
+
+class Arduino_Communication(QThread):
+    # Custom Signal, inform GUI about the way the connection ended
+    connection_exit_status = Signal(str, str)
+
+    # Receives Arduino path and line_edits' text as a list
+    def __init__(self, device=None, list_data=None, parent=None):
+        super(Arduino_Communication, self).__init__(parent)
+        self.device = device
+        self.list_data = list_data
+        self.serial_connection = None
+
+    def run(self):
+        try:
+            self.serial_connection = serial.Serial(self.device, 9600, timeout=4, write_timeout=4)
+            # If list_data is empty it means we must stop the valves
+            if not self.list_data:
+                logging.info("None, kill all valves")
+                # Sleep to prevent a dead-lock
+                self.sleep(2)
+                self.serial_connection.write("KILL")
+                # self.serial_connection.flushOutput()
+                raise Connection_Killed()
+            else:
+                # Send parameters for valves programming, KO cleans all vars on arduino
+                self.list_data.insert(0, "KO")
+                logging.warning("Appended KO to list_data" % self.list_data)
+                for count, elem_string in enumerate(self.list_data, 0):
+                    tries = 0
+                    self.sleep(2)
+                    logging.info("Post Sleep")
+                    self.serial_connection.write(self.list_data[count])
+                    logging.info("Post Write")
+                    # self.serial_connection.flushOutput()
+                    # Check data was sent correctly
+                    # if data got corrupted, try to resend 4 times
+                    while tries < 4:
+                        data = self.serial_connection.readline()
+                        # self.serial_connection.flushInput()
+                        if data:
+                            logging.debug("Data Sent: %s" % data)
+                            if data.replace('\r\n', '') == self.list_data[count]:
+                                logging.warning("OK, data returned %s:" % data)
+                                self.serial_connection.write('OK')
+                                # self.serial_connection.flushOutput()
+                                # self.sleep(2)
+                                break
+                        logging.info("Data malformed, retrying %s" % tries)
+                        tries = tries + 1
+                    # Close connection if data corruption couldn't be corrected
+                    if tries >= 4:
+                        logging.error("Unable to send data due to corruption")
+                        raise Connection_TimeOut_Arduino()
+                # self.serial_connection.write('--DONE--')
+        except (serial.SerialException, Connection_TimeOut_Arduino):
+            logging.error("Unable to send data")
+            try:
+                # TODO check if this affects
+                # self.serial_connection.write('KO')
+                self.serial_connection.close()
+            except AttributeError:
+                logging.info("Closed Serial because of error")
+            finally:
+                self.connection_exit_status.emit('error', self.tr(u"Error en conexión."))
+        except Connection_Killed:
+            self.connection_exit_status.emit('stopped', self.tr(u'Válvulas detenidas.'))
+        else:
+            self.connection_exit_status.emit('success', self.tr(u'Conexión exitosa.'))
+
 
 # Filter for catching focus out event
 class Filter(QObject):
