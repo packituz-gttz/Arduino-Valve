@@ -1,5 +1,6 @@
-<RCC>
+<!DOCTYPE RCC><RCC version="1.0">
   <qresource>
+    <file alias="symbol.png">myImages/val3-508.png</file>
     <file alias="logo.png">myImages/logomini2.png</file>
     <file alias="preferences.png">myImages/preferences.png</file>
     <file alias="close_usb.png">myImages/close_usb.png</file>
@@ -20,5 +21,11 @@
     <file alias="new_file.png">myImages/new_file.png</file>
     <file alias="open.png">myImages/open.png</file>
     <file alias="about.png">myImages/about.png</file>
+    <file alias="back.png">myImages/back.png</file>
+    <file alias="home.png">myImages/home.png</file>
+
+    <file>help/Archivo.html</file>
+    <file>help/Programa.html</file>
+    <file>help/Help.html</file>
   </qresource>
 </RCC>

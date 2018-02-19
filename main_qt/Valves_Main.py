@@ -9,6 +9,8 @@ from PyQt4.QtGui import (QMainWindow, QFileDialog, QKeySequence, QRegExpValidato
 import MainWindow_Pro
 import resources
 import logging
+import helpform
+import aboutdialog
 
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s => %(message)s')
 logging.debug('Start of program')
@@ -139,10 +141,20 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
         self.action_Limpiar.triggered.connect(self.clean_fields)
         self.action_Salir.triggered.connect(self.close)
         self.actionPreferencias.triggered.connect(self.settings)
+        self.actionVAL_508_Ayuda.triggered.connect(self.show_help)
+        self.actionAcerca_de_VAL_508.triggered.connect(self.show_about)
 
         self.action_Detener_USB.triggered.connect(self.stop_usb)
         self.action_Ejecutar.triggered.connect(self.execute)
         self.action_Para_Valvulas.triggered.connect(self.stop_all)
+
+    def show_about(self):
+        about = aboutdialog.AboutDialog(self)
+        about.show()
+
+    def show_help(self):
+        form = helpform.HelpForm('Help.html', self)
+        form.show()
 
     # TODO Implement
     def settings(self):
