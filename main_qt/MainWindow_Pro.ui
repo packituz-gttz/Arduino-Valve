@@ -33,13 +33,16 @@
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+      </property>
       <widget class="QWidget" name="scrollAreaWidgetContents">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
          <width>633</width>
-         <height>511</height>
+         <height>543</height>
         </rect>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -81,7 +84,7 @@
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Valvula</string>
+                <string>Válvula</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -97,7 +100,7 @@
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Delay</string>
+                <string>Retardo</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -113,7 +116,7 @@
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>On</string>
+                <string>Encendido</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -129,7 +132,7 @@
                 </sizepolicy>
                </property>
                <property name="text">
-                <string>Off</string>
+                <string>Apagado</string>
                </property>
                <property name="alignment">
                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
@@ -210,6 +213,9 @@
                   </property>
                   <property name="text">
                    <string>0</string>
+                  </property>
+                  <property name="placeholderText">
+                   <string/>
                   </property>
                  </widget>
                 </item>
@@ -1875,20 +1881,23 @@
    <property name="windowTitle">
     <string>toolBar_2</string>
    </property>
+   <property name="layoutDirection">
+    <enum>Qt::RightToLeft</enum>
+   </property>
    <property name="movable">
     <bool>false</bool>
    </property>
    <property name="iconSize">
     <size>
-     <width>24</width>
-     <height>24</height>
+     <width>32</width>
+     <height>32</height>
     </size>
    </property>
    <property name="floatable">
     <bool>false</bool>
    </property>
    <attribute name="toolBarArea">
-    <enum>BottomToolBarArea</enum>
+    <enum>TopToolBarArea</enum>
    </attribute>
    <attribute name="toolBarBreak">
     <bool>false</bool>

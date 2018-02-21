@@ -25,14 +25,14 @@ def main():
 
     app.processEvents()
     # LOAD, QApplication
-#    import mainWindow
+    import mainWindow
     import Valves_Main
     import time
     app.processEvents()
     app.setOrganizationName('Gatituz PK')
     app.setOrganizationDomain('http://gatituzmes-server.duckdns.org/')
     app.processEvents()
-    # window = mainWindow.MainWindowStart()
+#    window = mainWindow.MainWindowStart()
     window = Valves_Main.MainWindowStart()
     app.setWindowIcon(QIcon(":/logo.png"))
     app.processEvents()
