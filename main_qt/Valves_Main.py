@@ -14,7 +14,8 @@ import aboutdialog
 
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s => %(message)s')
 logging.debug('Start of program')
-
+# TODO Erase hour, etc.
+# TODO append .txt to file at saving
 
 class Connection_TimeOut_Arduino(Exception):
     pass
@@ -31,6 +32,12 @@ class Uncompatible_Data(Exception):
 class Connection_Killed(Exception):
     pass
 
+
+class Saved_Canceled(Exception):
+    pass
+
+class Saved_Accepted(Exception):
+    pass
 
 class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -180,12 +187,50 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
                 self.lineEdits_list[index - 1][index2].setText('0')
 
     def save_file_as(self):
+        filename_copy = self.filename
+        logging.info("Current filename: %s" % self.filename)
         my_home = os.path.expanduser('~')
         self.filename = QFileDialog.getSaveFileName(self, self.tr('Guardar como'), os.path.join(my_home, "archivo.txt"), "", "",
                                                     QFileDialog.DontUseNativeDialog)
         logging.info("Filename to save: %s" % self.filename)
         if not self.filename.isNull():
-            self.write_data_to_file('w')
+            if self.filename.endsWith(QString('.txt')):
+                self.write_data_to_file('w')
+            else:
+                self.filename.append(QString('.txt'))
+                messageBox = QMessageBox(self)
+                messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+                messageBox.setWindowTitle(self.tr('Advertencia'))
+                messageBox.setText(self.tr(u"El archivo ya existe, ¿Reemplazar?"))
+                messageBox.setStandardButtons(QMessageBox.Yes|QMessageBox.No)
+                messageBox.setIconPixmap(QPixmap(':/broken_file.png'))
+                if messageBox.exec_() == QMessageBox.Yes:
+                    self.write_data_to_file('w')
+                else:
+                    try:
+                        while True:
+                            self.filename = QFileDialog.getSaveFileName(self, self.tr('Guardar como'),
+                                                                    os.path.join(my_home, "archivo.txt"), "", "",
+                                                                    QFileDialog.DontUseNativeDialog)
+                            if self.filename.isNull():
+                                raise Saved_Canceled()
+                            else:
+                                messageBox = QMessageBox(self)
+                                messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
+                                messageBox.setWindowTitle(self.tr('Advertencia'))
+                                messageBox.setText(self.tr(u"El archivo ya existe, ¿Reemplazar?"))
+                                messageBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+                                messageBox.setIconPixmap(QPixmap(':/broken_file.png'))
+                                if messageBox.exec_() == QMessageBox.Yes:
+                                    self.write_data_to_file('w')
+                                    raise Saved_Accepted()
+                    except Saved_Canceled:
+                        self.filename = filename_copy
+                    except Saved_Accepted:
+                        pass
+        logging.info("Current filename after operation: %s" % self.filename)
+
+
 
     def save_file(self):
         if self.filename.isNull():
