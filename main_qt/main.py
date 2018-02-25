@@ -1,11 +1,11 @@
-# import sys
+import sys
 from PyQt4.QtGui import QApplication, QIcon, QLabel, QPixmap, QSplashScreen
 from PyQt4.QtCore import Qt
 import resources
 
 def main():
 
-    app = QApplication(['Val 508'])
+    app = QApplication(sys.argv)
 
     splash_pixmap = QPixmap(':/cover.png')
     splash_screen = QSplashScreen(splash_pixmap, Qt.WindowStaysOnTopHint)
@@ -31,6 +31,7 @@ def main():
     app.processEvents()
     app.setOrganizationName('Gatituz PK')
     app.setOrganizationDomain('http://gatituzmes-server.duckdns.org/')
+    app.setApplicationName('VAL 518')
     app.processEvents()
 #    window = mainWindow.MainWindowStart()
     window = Valves_Main.MainWindowStart()
