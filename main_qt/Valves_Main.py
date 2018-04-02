@@ -2,7 +2,8 @@
 import os
 import serial
 import serial.tools.list_ports
-from PyQt4.QtCore import (Qt, pyqtSignature, QSignalMapper, QRegExp, QThread, QEvent, QObject, QString)
+from PyQt4.QtCore import (Qt, pyqtSignature, QSignalMapper, QRegExp, QThread, QEvent, QObject, QString, QMutex,
+                          QWaitCondition)
 from PyQt4.QtCore import pyqtSignal as Signal
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QKeySequence, QRegExpValidator, QLabel, QFrame, QIcon, QAction,
                          QComboBox, QMessageBox, QProgressDialog, QPixmap)
@@ -16,6 +17,10 @@ logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s =>
 logging.debug('Start of program')
 # TODO Erase hour, etc.
 # TODO append .txt to file at saving
+
+
+wait_condition = QWaitCondition()
+mutex = QMutex()
 
 class Connection_TimeOut_Arduino(Exception):
     pass
@@ -36,8 +41,14 @@ class Connection_Killed(Exception):
 class Saved_Canceled(Exception):
     pass
 
+
 class Saved_Accepted(Exception):
     pass
+
+
+class Connection_Stopped(Exception):
+    pass
+
 
 class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -284,7 +295,10 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
             try:
                 self.statusBar1.showMessage(self.tr(u'Conexión detenida'))
                 if self.thread_connection.isRunning():
-                    self.thread_connection.terminate()
+                    mutex.lock()
+                    self.thread_connection.kill_serial = True
+                    mutex.unlock()
+                    # self.thread_connection.terminate()
             except AttributeError:
                 logging.debug("Thread not running \'disconnected! \'")
         else:
@@ -389,6 +403,7 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
                             raise Uncompatible_Data()
                         inner_elem.setText(list_values[count])
                         count = count + 1
+                self.filename = file_name
         except (IOError, OSError):
             messageBox = QMessageBox(self)
             messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
@@ -497,6 +512,7 @@ class Arduino_Communication(QThread):
         self.device = device
         self.list_data = list_data
         self.serial_connection = None
+        self.kill_serial = False
 
     def run(self):
         try:
@@ -523,6 +539,11 @@ class Arduino_Communication(QThread):
                     # Check data was sent correctly
                     # if data got corrupted, try to resend 4 times
                     while tries < 4:
+                        mutex.lock()
+                        if self.kill_serial:
+                            mutex.unlock()
+                            raise Connection_Stopped()
+                        mutex.unlock()
                         data = self.serial_connection.readline()
                         # self.serial_connection.flushInput()
                         if data:
@@ -552,6 +573,8 @@ class Arduino_Communication(QThread):
                 self.connection_exit_status.emit('error', self.tr(u"Error en conexión."))
         except Connection_Killed:
             self.connection_exit_status.emit('stopped', self.tr(u'Válvulas detenidas.'))
+        except Connection_Stopped:
+            pass
         else:
             self.connection_exit_status.emit('success', self.tr(u'Conexión exitosa.'))
 

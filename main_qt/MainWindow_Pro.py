@@ -1869,6 +1869,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusBar1)
         self.toolBar = QtGui.QToolBar(MainWindow)
         self.toolBar.setMovable(False)
+        self.toolBar.setIconSize(QtCore.QSize(32, 32))
         self.toolBar.setFloatable(False)
         self.toolBar.setObjectName(_fromUtf8("toolBar"))
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
@@ -2081,7 +2082,7 @@ class Ui_MainWindow(object):
         MainWindow.setTabOrder(self.edit8_totals, self.scrollArea)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(_translate("MainWindow", "Val 508", None))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Val 518", None))
         self.label.setText(_translate("MainWindow", "Válvula", None))
         self.label_2.setText(_translate("MainWindow", "Retardo", None))
         self.label_3.setText(_translate("MainWindow", "Encendido", None))
@@ -2211,8 +2212,8 @@ class Ui_MainWindow(object):
         self.action_Limpiar.setText(_translate("MainWindow", "&Limpiar", None))
         self.action_Salir.setText(_translate("MainWindow", "&Salir", None))
         self.action_Abrir.setText(_translate("MainWindow", "&Abrir", None))
-        self.actionVAL_508_Ayuda.setText(_translate("MainWindow", "VAL 508 &Ayuda", None))
-        self.actionAcerca_de_VAL_508.setText(_translate("MainWindow", "A&cerca de VAL 508", None))
+        self.actionVAL_508_Ayuda.setText(_translate("MainWindow", "VAL 518 &Ayuda", None))
+        self.actionAcerca_de_VAL_508.setText(_translate("MainWindow", "A&cerca de VAL 518", None))
         self.action_Guardar.setText(_translate("MainWindow", "&Guardar", None))
         self.actionGuardar_Como.setText(_translate("MainWindow", "Guardar &Como", None))
         self.action_Ejecutar.setText(_translate("MainWindow", "&Ejecutar", None))

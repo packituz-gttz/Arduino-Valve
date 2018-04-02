@@ -1,5 +1,5 @@
 import sys
-from PyQt4.QtGui import QApplication, QIcon, QLabel, QPixmap, QSplashScreen
+from PyQt4.QtGui import QApplication, QIcon, QPixmap, QSplashScreen
 from PyQt4.QtCore import Qt
 import resources
 
