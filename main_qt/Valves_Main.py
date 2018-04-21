@@ -8,7 +8,6 @@ from PyQt4.QtCore import pyqtSignal as Signal
 from PyQt4.QtGui import (QMainWindow, QFileDialog, QKeySequence, QRegExpValidator, QLabel, QFrame, QIcon, QAction,
                          QComboBox, QMessageBox, QProgressDialog, QPixmap)
 import MainWindow_Pro
-import resources
 import logging
 import helpform
 import aboutdialog
