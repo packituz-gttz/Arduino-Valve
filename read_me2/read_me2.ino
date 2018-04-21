@@ -4,7 +4,7 @@
 // avr-libc library includes
 #include <avr/io.h>
 #include <avr/interrupt.h>
- 
+
 #define LEDPIN 2
 #define LEDPIN2 3
 #define LEDPIN3 4
@@ -102,7 +102,6 @@ boolean valve6_off_passed = false;
 boolean valve7_off_passed = false;
 boolean valve8_off_passed = false;
 
-//Time out vars?
 unsigned long time_out1 = 0;
 unsigned long time_out2 = 0;
 unsigned long time_out3 = 0;
