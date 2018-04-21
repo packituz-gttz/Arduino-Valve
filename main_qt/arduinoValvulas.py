@@ -13,6 +13,8 @@ import resources
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s => %(message)s')
 logging.debug('Start of program')
 
+
+# Custom Exceptions
 class Connection_TimeOut_Arduino(Exception):
     pass
 
@@ -31,18 +33,21 @@ class Connection_Killed(Exception):
 
 # Main window imported from ui file
 class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
-    closedInform = Signal()
+    # TODO used?
+    # closedInform = Signal()
 
     def __init__(self, parent=None):
         super(ValvulasMainWindow, self).__init__(parent)
+        # Set mappers for valve butttons
         self.myMapper = QSignalMapper(self)
         self.myMapper_StyleSheet = QSignalMapper(self)
+        # Load UI
         self.setupUi(self)
 
         self.regex_edits = QRegExp(r"(^[0]+$|^$)")
         self._filter = Filter()
         self.filename = QString(u'')
-        self.edit1_delayh.installEventFilter(self._filter)
+        # self.edit1_delayh.installEventFilter(self._filter)
         self.sizeLabel = QLabel()
         self.sizeLabel.setFrameStyle(QFrame.StyledPanel | QFrame.Sunken)
         self.statusBar1.addPermanentWidget(self.sizeLabel)
@@ -50,10 +55,11 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
         self.create_tool_bar()
         self.update_devices_list()
         self.button_stop.clicked.connect(self.stop_all)
-        # List of valve pushbuttons
+
+        # List of valve Pushbuttons
         self.valve_list = [self.valve1, self.valve2, self.valve3, self.valve4,
                            self.valve5, self.valve6, self.valve7, self.valve8]
-
+        # List of LineEdits
         self.lineEdits_list = [(self.edit1_delayh, self.edit1_delaym, self.edit1_delays,
                                 self.edit1_onh, self.edit1_onm, self.edit1_ons,
                                 self.edit1_offh, self.edit1_offm, self.edit1_offs,
@@ -93,24 +99,25 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
                                 self.edit8_onh, self.edit8_onm, self.edit8_ons,
                                 self.edit8_offh, self.edit8_offm, self.edit8_offs,
                                 self.edit8_totalh, self.edit8_totalm, self.edit8_totals)]
-
-        # index = 1
+        # Assign mappers to
         for index, editLabels in enumerate(self.lineEdits_list, 1):
 
             for index2, lineedits in enumerate(editLabels, 0):
+                # Apply mapper (GUIObject, objectIndex)
                 self.myMapper_StyleSheet.setMapping(self.lineEdits_list[index - 1][index2], index - 1)
+                # Connect mapper to signal
                 (self.lineEdits_list[index - 1][index2]).textChanged.connect(self.myMapper_StyleSheet.map)
+                # Set event Filter, for detecting when Focus changes
                 self.lineEdits_list[index - 1][index2].installEventFilter(self._filter)
 
-
+            # Set Mappers for buttons (1..8)
             self.myMapper.setMapping(self.valve_list[index - 1], index)
+            # Connect mapper to signal for detecting clicks on buttons
             (self.valve_list[index - 1]).clicked.connect(self.myMapper.map)
 
         self.myMapper.mapped['int'].connect(self.enable_fields)
         self.myMapper_StyleSheet.mapped['int'].connect(self.valve_color_status)
-        # self.myMapper.mapped['int'].connect(self.print_me)
         self.btn_stop_usb.clicked.connect(self.stop_usb)
-        # self.edit1_delayh.textChanged.connect(self.valve_color_status)
 
     def valve_color_status(self, index):
         logging.info("Checking color from valve button")
@@ -118,7 +125,6 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
             if edit.text().contains(self.regex_edits):
                 self.valve_list[index].setStyleSheet('')
             else:
-                # self.valve_list[index].setStyleSheet('background-color: rgb(29, 255, 36);')
                 self.valve_list[index].setStyleSheet('background-color: rgb(180, 255, 147);')
                 break
 
@@ -307,37 +313,6 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
     def on_btn_open_clicked(self):
         self.openFile()
 
-    # @pyqtSignature("")
-    # def on_valve1_clicked(self):
-    #     self.enable_fields(1)
-
-    # @pyqtSignature("")
-    # def on_valve2_clicked(self):
-    #     self.enable_fields(2)
-    #
-    # @pyqtSignature("")
-    # def on_valve3_clicked(self):
-    #     self.enable_fields(3)
-    #
-    # @pyqtSignature("")
-    # def on_valve4_clicked(self):
-    #     self.enable_fields(4)
-    #
-    # @pyqtSignature("")
-    # def on_valve5_clicked(self):
-    #     self.enable_fields(5)
-    #
-    # @pyqtSignature("")
-    # def on_valve6_clicked(self):
-    #     self.enable_fields(6)
-    #
-    # @pyqtSignature("")
-    # def on_valve7_clicked(self):
-    #     self.enable_fields(7)
-    #
-    # @pyqtSignature("")
-    # def on_valve8_clicked(self):
-    #     self.enable_fields(8)
 
     # Enables/Disables lineedits for time inputs
     def enable_fields(self, index):
@@ -406,7 +381,7 @@ class ValvulasMainWindow(QMainWindow, Valvulas.Ui_ValvulasMainWindow):
 
     def closeEvent(self, QCloseEvent):
         try:
-            self.closedInform.emit()
+            # self.closedInform.emit()
             self.thread_connection.serial_connection.close()
             logging.debug("Thread running and killed at closing program")
         except AttributeError:

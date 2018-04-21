@@ -13,13 +13,15 @@ import logging
 import helpform
 import aboutdialog
 
+
+# Used for debug purposes
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s => %(message)s')
 logging.debug('Start of program')
 
-
-wait_condition = QWaitCondition()
 mutex = QMutex()
 
+
+# Custom Exceptions
 class Connection_TimeOut_Arduino(Exception):
     pass
 
@@ -48,11 +50,14 @@ class Connection_Stopped(Exception):
     pass
 
 
+# Main Window
 class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
     def __init__(self, parent=None):
         super(MainWindowStart, self).__init__(parent)
+        # Mappers for connecting buttons and labels
         self.myMapper = QSignalMapper(self)
         self.myMapper_StyleSheet = QSignalMapper(self)
+        # Load UI
         self.setupUi(self)
 
         self.regex_edits = QRegExp(r"(^[0]+$|^$)")
@@ -74,9 +79,10 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
         self.valve_list = [self.valve1, self.valve2, self.valve3, self.valve4,
                            self.valve5, self.valve6, self.valve7, self.valve8]
 
+        # GroupBoxes for grouping labels and buttons on each row, used for applying StyleSheets
         self.group_boxes = [self.groupbox1, self.groupbox2, self.groupbox3, self.groupbox4, self.groupbox5,
                             self.groupbox6, self.groupbox7, self.groupbox8]
-
+        # List of lineEdits
         self.lineEdits_list = [(self.edit1_delayh, self.edit1_delaym, self.edit1_delays,
                                 self.edit1_onh, self.edit1_onm, self.edit1_ons,
                                 self.edit1_offh, self.edit1_offm, self.edit1_offs,
@@ -117,23 +123,26 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
                                 self.edit8_offh, self.edit8_offm, self.edit8_offs,
                                 self.edit8_totalh, self.edit8_totalm, self.edit8_totals)]
 
-        # index = 1
+
         for index, editLabels in enumerate(self.lineEdits_list, 1):
 
             for index2, lineedits in enumerate(editLabels, 0):
+                # Apply mapper (GUIObject, objectIndex)
                 self.myMapper_StyleSheet.setMapping(self.lineEdits_list[index - 1][index2], index - 1)
+                # Connect mapper to signal
                 (self.lineEdits_list[index - 1][index2]).textChanged.connect(self.myMapper_StyleSheet.map)
+                # Set event Filter, for detecting when Focus changes
                 self.lineEdits_list[index - 1][index2].installEventFilter(self._filter)
-
+            # Set Mappers for buttons (1..8)
             self.myMapper.setMapping(self.valve_list[index - 1], index)
+            # Connect mapper to signal for detecting clicks on buttons
             (self.valve_list[index - 1]).clicked.connect(self.myMapper.map)
-
+        # Connect to signal for enabling labelEdits
         self.myMapper.mapped['int'].connect(self.enable_fields)
+        # Connect to signal for changing color of groupbox used for visual indication
         self.myMapper_StyleSheet.mapped['int'].connect(self.valve_color_status)
-        # self.myMapper.mapped['int'].connect(self.print_me)
-#        self.btn_stop_usb.clicked.connect(self.stop_usb)
-        # self.edit1_delayh.textChanged.connect(self.valve_color_status)
 
+    # Create Keyboard Shortcuts
     def assign_shortcuts(self):
         self.actionArchivo_Nuevo.setShortcut(QKeySequence.New)
         self.action_Abrir.setShortcut(QKeySequence.Open)
@@ -148,6 +157,7 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
         self.action_Ejecutar.setShortcut('Ctrl+Shift+X')
         self.action_Para_Valvulas.setShortcut('Ctrl+Shift+P')
 
+    # Create connections to signals
     def create_connections(self):
         self.actionArchivo_Nuevo.triggered.connect(self.new_file)
         self.action_Abrir.triggered.connect(self.open_file)
@@ -155,7 +165,6 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
         self.actionGuardar_Como.triggered.connect(self.save_file_as)
         self.action_Limpiar.triggered.connect(self.clean_fields)
         self.action_Salir.triggered.connect(self.close)
-        self.actionPreferencias.triggered.connect(self.settings)
         self.actionVAL_508_Ayuda.triggered.connect(self.show_help)
         self.actionAcerca_de_VAL_508.triggered.connect(self.show_about)
 
@@ -163,10 +172,12 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
         self.action_Ejecutar.triggered.connect(self.execute)
         self.action_Para_Valvulas.triggered.connect(self.stop_all)
 
+    # Creation of About Dialog
     def show_about(self):
         about = aboutdialog.AboutDialog(self)
         about.show()
 
+    # Creation of Help Form
     def show_help(self):
         form = helpform.HelpForm('Help.html', self)
         form.show()
@@ -175,9 +186,9 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
         self.filename = QString()
         self.clean_fields()
 
+    # Close connection to arduino before closing Program
     def closeEvent(self, QCloseEvent):
         try:
-            self.closedInform.emit()
             self.thread_connection.serial_connection.close()
             logging.debug("Thread running and killed at closing program")
         except AttributeError:
@@ -238,11 +249,13 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
         else:
             self.write_data_to_file('w')
 
+    # Colect data for arduino
     def execute(self):
         string_data = ''
         list_strings = []
         if str(self.arduino_combobox.currentText()):
             self.statusBar1.showMessage(self.tr('Conectando...'))
+            # Gather all  the contents of each row of valves and create a list of lists with them
             for elem_edit in self.lineEdits_list:
                 # delay
                 string_data = string_data + str(((int(elem_edit[0].text()) * 3600) + (int(elem_edit[1].text()) * 60)
@@ -260,13 +273,14 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
                 list_strings.append(string_data)
                 string_data = ''
 
+            # Start QThread for communicating with arduino
             self.thread_connection = Arduino_Communication(str(self.arduino_combobox.currentText()), list_strings)
             self.thread_connection.start()
             self.action_Ejecutar.setEnabled(False)
             self.action_Para_Valvulas.setEnabled(False)
 
-            # self.btn_execute.setEnabled(False)
-            # self.button_stop.setEnabled(False)
+            # Connect to current QThread instance in order to know the status of it's termination
+            # This line used only when stopping current task
             self.thread_connection.finished.connect(self.finished_thread)
             self.thread_connection.connection_exit_status.connect(self.finished_thread)
         else:
@@ -277,8 +291,8 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
             messageBox.setStandardButtons(QMessageBox.Ok)
             messageBox.setIconPixmap(QPixmap(':/usb_error.png'))
             messageBox.exec_()
-            # QMessageBox.warning(self, self.tr('Advertencia'), self.tr("Arduino no seleccionado"), QMessageBox.Ok)
 
+    # Inform QThread to stop sending data to arduino
     def stop_usb(self):
         if str(self.arduino_combobox.currentText()):
             try:
@@ -287,7 +301,6 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
                     mutex.lock()
                     self.thread_connection.kill_serial = True
                     mutex.unlock()
-                    # self.thread_connection.terminate()
             except AttributeError:
                 logging.debug("Thread not running \'disconnected! \'")
         else:
@@ -300,11 +313,9 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
             messageBox.exec_()
 
     def enable_fields(self, index):
-        # hours_reg = QRegExp(r"([0-9])|([0-9][0-9][0-9])")
         hours_reg = QRegExp(r"0*[0-9]{1,3}")
         sec_reg = QRegExp(r"(0*[0-9])|(0*[0-5][0-9])")
         for counter, line_edit in enumerate(self.lineEdits_list[index - 1]):
-            # if counter < 6:
             line_edit.setEnabled(self.valve_list[index - 1].isChecked())
             if counter % 3 == 0:
                 line_edit.setValidator(QRegExpValidator(hours_reg, self))
@@ -319,7 +330,6 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
                                                       border: 2px solid;
                                                       border-color: rgba(255, 255, 255, 0);}''')
             else:
-                # self.valve_list[index].setStyleSheet('background-color: rgb(29, 255, 36);')
                 self.group_boxes[index].setStyleSheet('''QGroupBox {background-color: rgba(103, 255, 126, 150);
                                                       border: 2px solid;
                                                       border-color: rgba(255, 255, 255, 255);}''')
@@ -332,7 +342,6 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
         self.arduino_combobox = QComboBox()
         self.arduino_combobox.setToolTip(self.tr('Seleccionar Arduino'))
         self.arduino_combobox.setFocusPolicy(Qt.NoFocus)
-        # self.arduino_combobox.activated.connect(self.updateChoosenArduino)
 
         # Update List of Arduino devices
         self.reload = QAction(QIcon(":/reload.png"), self.tr("&Refrescar"), self)
@@ -343,6 +352,7 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
         self.toolBar.addWidget(self.arduino_combobox)
         self.toolBar.addAction(self.reload)
 
+    # Update current usb devices connected to PC
     def update_devices_list(self):
         device_list = serial.tools.list_ports.comports()
         current_arduino = self.arduino_combobox.currentText()
@@ -352,6 +362,7 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
             if device.device == current_arduino:
                 self.arduino_combobox.setCurrentIndex(device_index)
 
+    # Stop current arduino task
     def stop_all(self):
         if str(self.arduino_combobox.currentText()):
             self.thread_connection = Arduino_Communication(str(self.arduino_combobox.currentText()))
@@ -359,9 +370,6 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
             self.action_Ejecutar.setEnabled(False)
             self.action_Para_Valvulas.setEnabled(False)
             self.action_Detener_USB.setEnabled(False)
-            # self.btn_execute.setEnabled(False)
-            # self.button_stop.setEnabled(False)
-            # self.btn_stop_usb.setEnabled(False)
             self.thread_connection.finished.connect(self.finished_thread)
             self.thread_connection.connection_exit_status.connect(self.finished_thread)
         else:
@@ -401,7 +409,6 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
             messageBox.setStandardButtons(QMessageBox.Ok)
             messageBox.setIconPixmap(QPixmap(':/broken_file.png'))
             messageBox.exec_()
-            # QMessageBox.critical(self, self.tr('Error'), self.tr('No se pudo abrir el archivo.'), QMessageBox.Ok)
         except (IndexError, Uncompatible_Data):
             messageBox = QMessageBox(self)
             messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
@@ -411,6 +418,7 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
             messageBox.setIconPixmap(QPixmap(':/broken_file.png'))
             messageBox.exec_()
 
+    # Inform the user if we were able to send data successfully to arduino
     def finished_thread(self, error=None,  message=''):
         if error == 'error':
             messageBox = QMessageBox(self)
@@ -420,7 +428,6 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
             messageBox.setStandardButtons(QMessageBox.Ok)
             messageBox.setIconPixmap(QPixmap(':/usb_error.png'))
             messageBox.exec_()
-            # QMessageBox.critical(self, 'Error', message, QMessageBox.Ok)
             return
         elif error == 'success':
             messageBox = QMessageBox(self)
@@ -430,7 +437,6 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
             messageBox.setStandardButtons(QMessageBox.Ok)
             messageBox.setIconPixmap(QPixmap(':/usb_success.png'))
             messageBox.exec_()
-            # QMessageBox.information(self, self.tr(u'Éxito'), message, QMessageBox.Ok)
             return
         elif error == 'stopped':
             messageBox = QMessageBox(self)
@@ -444,23 +450,19 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
         self.action_Ejecutar.setEnabled(True)
         self.action_Para_Valvulas.setEnabled(True)
         self.action_Detener_USB.setEnabled(True)
-        # self.btn_execute.setEnabled(True)
-        # self.button_stop.setEnabled(True)
-        # self.btn_stop_usb.setEnabled(True)
         self.statusBar1.showMessage(self.tr('Finalizado'))
 
+    # Save data to disk
     def write_data_to_file(self, open_mode):
         progressDialog = QProgressDialog()
         progressDialog.setModal(True)
         progressDialog.setLabelText(self.tr('Guardando...'))
         progressDialog.setMaximum(8)
         progressDialog.setCancelButton(None)
-        # self.save_data = SaveDataThread(listx,
-        #                                                   listy, self.plot_settings['separator'], self.filename, self)
-        # self.save_data.start()
         progressDialog.show()
 
         try:
+            # File is closed automatically even on error
             with open(unicode(self.filename), open_mode) as file_obj:
                 for count, elem_edit in enumerate(self.lineEdits_list, 1):
                     file_obj.write(''.join([str(elem_edit[0].text()), '\n']))
@@ -478,7 +480,6 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
                     progressDialog.setValue(count)
         except (IOError, OSError):
             progressDialog.close()
-            # QMessageBox.critical(self, self.tr('Error'), self.tr('Error al guardar.'), QMessageBox.Ok)
             messageBox = QMessageBox(self)
             messageBox.setStyleSheet('QMessageBox QLabel {font: bold 14pt "Cantarell";}')
             messageBox.setWindowTitle(self.tr('Error'))
@@ -501,6 +502,7 @@ class Arduino_Communication(QThread):
         self.device = device
         self.list_data = list_data
         self.serial_connection = None
+        # This variable if true will stop the current transmission of data to the arduino
         self.kill_serial = False
 
     def run(self):
@@ -509,28 +511,29 @@ class Arduino_Communication(QThread):
             # If list_data is empty it means we must stop the valves
             if not self.list_data:
                 logging.info("None, kill all valves")
-                # Sleep to prevent a dead-lock
+                # Sleep to prevent arduino communication hangs
                 self.sleep(2)
+                # Send message to terminate arduino action
                 self.serial_connection.write("KILL")
-                # self.serial_connection.flushOutput()
                 raise Connection_Killed()
             else:
-                # Send parameters for valves programming, KO cleans all vars on arduino
+                # Send parameters for valves programming, KO cleans all vars on arduino (restarts everything)
                 self.list_data.insert(0, "KO")
-                logging.warning("Appended KO to list_data" % self.list_data)
+                logging.warning("Prepended KO to list_data" % self.list_data)
                 for count, elem_string in enumerate(self.list_data, 0):
                     tries = 0
                     self.sleep(2)
                     logging.info("Post Sleep")
+                    # Send data for one valve on each loop
                     self.serial_connection.write(self.list_data[count])
                     logging.info("Post Write")
-                    # self.serial_connection.flushOutput()
                     # Check data was sent correctly
                     # if data got corrupted, try to resend 4 times
                     while tries < 4:
                         mutex.lock()
                         if self.kill_serial:
                             mutex.unlock()
+                            # Connection Stopped by User
                             raise Connection_Stopped()
                         mutex.unlock()
                         data = self.serial_connection.readline()
@@ -540,8 +543,6 @@ class Arduino_Communication(QThread):
                             if data.replace('\r\n', '') == self.list_data[count]:
                                 logging.warning("OK, data returned %s:" % data)
                                 self.serial_connection.write('OK')
-                                # self.serial_connection.flushOutput()
-                                # self.sleep(2)
                                 break
                         logging.info("Data malformed, retrying %s" % tries)
                         tries = tries + 1
@@ -549,20 +550,24 @@ class Arduino_Communication(QThread):
                     if tries >= 4:
                         logging.error("Unable to send data due to corruption")
                         raise Connection_TimeOut_Arduino()
-                # self.serial_connection.write('--DONE--')
+        # Raised if unable to connect to arduino or connection got corrupted
         except (serial.SerialException, Connection_TimeOut_Arduino):
             logging.error("Unable to send data")
+            # Try to close connection
             try:
-                # self.serial_connection.write('KO')
                 self.serial_connection.close()
             except AttributeError:
                 logging.info("Closed Serial because of error")
             finally:
+                # Send information to the MainWindow about the status of the termination
                 self.connection_exit_status.emit('error', self.tr(u"Error en conexión."))
+        # Raised when user restarted arduino
         except Connection_Killed:
             self.connection_exit_status.emit('stopped', self.tr(u'Válvulas detenidas.'))
+        # Raised when connection was stopped by the user
         except Connection_Stopped:
             pass
+        # Everything ended fine
         else:
             self.connection_exit_status.emit('success', self.tr(u'Conexión exitosa.'))
 

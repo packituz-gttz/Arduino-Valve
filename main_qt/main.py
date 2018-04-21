@@ -6,25 +6,13 @@ import resources
 
 def main():
     app = QApplication(sys.argv)
-
+    # Show SplashScreen
     splash_pixmap = QPixmap(':/cover.png')
     splash_screen = QSplashScreen(splash_pixmap, Qt.WindowStaysOnTopHint)
-    # splash = QLabel("<font color=red>CARGANDO...</font>")
-    # splash.setWindowFlags(Qt.SplashScreen)
     splash_screen.show()
 
-    # Translation, implemented but won't be used for this version
-    # locale = QLocale.system().name()
-    # qtTranslator = QTranslator()
-    # print locale
-    # if qtTranslator.load("qt_" + locale, ":/"):
-    #     app.installTranslator(qtTranslator)
-    # appTranslator = QTranslator()
-    # if appTranslator.load("valves_" + locale, ":/"):
-    #     app.installTranslator(appTranslator)
-
     app.processEvents()
-    # LOAD, QApplication
+    # Runtime imports
     import Valves_Main
     import time
     app.processEvents()
@@ -37,7 +25,6 @@ def main():
     app.processEvents()
 
     app.processEvents()
-    # TODO Check loading speed
     time.sleep(2)
     app.processEvents()
     time.sleep(1)
@@ -45,7 +32,8 @@ def main():
     time.sleep(1)
     window.showMaximized()
     splash_screen.close()
-    # Exec app
+
+    # Execute app
     app.exec_()
 
 
