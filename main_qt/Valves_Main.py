@@ -15,8 +15,6 @@ import aboutdialog
 
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s => %(message)s')
 logging.debug('Start of program')
-# TODO Erase hour, etc.
-# TODO append .txt to file at saving
 
 
 wait_condition = QWaitCondition()
@@ -71,7 +69,7 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
 
         self.create_tool_bar()
         self.update_devices_list()
-        #self.button_stop.clicked.connect(self.stop_all)
+        # self.button_stop.clicked.connect(self.stop_all)
         # List of valve pushbuttons
         self.valve_list = [self.valve1, self.valve2, self.valve3, self.valve4,
                            self.valve5, self.valve6, self.valve7, self.valve8]
@@ -150,7 +148,6 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
         self.action_Ejecutar.setShortcut('Ctrl+Shift+X')
         self.action_Para_Valvulas.setShortcut('Ctrl+Shift+P')
 
-
     def create_connections(self):
         self.actionArchivo_Nuevo.triggered.connect(self.new_file)
         self.action_Abrir.triggered.connect(self.open_file)
@@ -174,10 +171,6 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
         form = helpform.HelpForm('Help.html', self)
         form.show()
 
-    # TODO Implement
-    def settings(self):
-        print "me"
-
     def new_file(self):
         self.filename = QString()
         self.clean_fields()
@@ -189,8 +182,6 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
             logging.debug("Thread running and killed at closing program")
         except AttributeError:
             logging.debug("Thread was not running when closing program OK")
-
-
 
     def clean_fields(self):
         for index, editLabels in enumerate(self.lineEdits_list, 1):
@@ -240,8 +231,6 @@ class MainWindowStart(QMainWindow, MainWindow_Pro.Ui_MainWindow):
                     except Saved_Accepted:
                         pass
         logging.info("Current filename after operation: %s" % self.filename)
-
-
 
     def save_file(self):
         if self.filename.isNull():
@@ -564,7 +553,6 @@ class Arduino_Communication(QThread):
         except (serial.SerialException, Connection_TimeOut_Arduino):
             logging.error("Unable to send data")
             try:
-                # TODO check if this affects
                 # self.serial_connection.write('KO')
                 self.serial_connection.close()
             except AttributeError:

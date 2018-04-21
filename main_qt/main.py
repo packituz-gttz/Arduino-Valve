@@ -3,8 +3,8 @@ from PyQt4.QtGui import QApplication, QIcon, QPixmap, QSplashScreen
 from PyQt4.QtCore import Qt
 import resources
 
-def main():
 
+def main():
     app = QApplication(sys.argv)
 
     splash_pixmap = QPixmap(':/cover.png')
@@ -25,7 +25,6 @@ def main():
 
     app.processEvents()
     # LOAD, QApplication
-    import mainWindow
     import Valves_Main
     import time
     app.processEvents()
@@ -33,7 +32,6 @@ def main():
     app.setOrganizationDomain('http://gatituzmes-server.duckdns.org/')
     app.setApplicationName('VAL 518')
     app.processEvents()
-#    window = mainWindow.MainWindowStart()
     window = Valves_Main.MainWindowStart()
     app.setWindowIcon(QIcon(":/logo.png"))
     app.processEvents()
@@ -49,6 +47,7 @@ def main():
     splash_screen.close()
     # Exec app
     app.exec_()
+
 
 if __name__ == '__main__':
     main()
